@@ -5,10 +5,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.web.client.RestTemplate;
 
 // config/RedisConfig.java
 @Configuration
 public class RedisConfig {
+
+
+    // RestTemplate để WebhookService gọi HTTP POST
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     @Bean
     public RedisTemplate<String, String> redisTemplate(
