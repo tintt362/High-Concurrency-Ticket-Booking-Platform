@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/asyncjobdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+    username: admin
+    password: admin123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        # ✅ Cách 1: Xóa dòng dialect này đi (Hibernate 6 sẽ tự nhận diện cực chuẩn)
+        # ✅ Cách 2: Nếu muốn để lại, hãy đổi thành:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+
+logging:
+  level:
+    # Sửa lại định dạng logging cho đúng cú pháp YAML
+    com.example: DEBUG
