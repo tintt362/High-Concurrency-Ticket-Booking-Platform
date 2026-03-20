@@ -12,19 +12,42 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        # ✅ Cách 1: Xóa dòng dialect này đi (Hibernate 6 sẽ tự nhận diện cực chuẩn)
-        # ✅ Cách 2: Nếu muốn để lại, hãy đổi thành:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
   data:
     redis:
       host: localhost
       port: 6379
+      timeout: 2000ms
+
+  # ── Mailtrap: inbox test email, đăng ký free tại mailtrap.io ──
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: ee68c3357c9725   # ← thay bằng username từ Mailtrap
+    password: fb2e83f24305a1   # ← thay bằng password từ Mailtrap
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Asia/Ho_Chi_Minh
 
 server:
   port: 8080
 
+# Cấu hình thư mục lưu file PDF
+app:
+  storage:
+    pdf-dir: uploads/pdf
+    base-url: http://localhost:8080/files
+
 logging:
   level:
-    # Sửa lại định dạng logging cho đúng cú pháp YAML
     com.example: DEBUG
+    org.hibernate.SQL: DEBUG
