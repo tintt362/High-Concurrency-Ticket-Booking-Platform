@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 public class EmailPayload {
     private String to;        // Địa chỉ nhận
-    private String subject;   // Tiêu đề
+    private String subject;
+    private String recipientName; // Thêm field này// Tiêu đề
     private String body;      // Nội dung
 }

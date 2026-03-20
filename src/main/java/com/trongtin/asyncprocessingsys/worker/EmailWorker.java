@@ -1,23 +1,21 @@
 package com.trongtin.asyncprocessingsys.worker;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trongtin.asyncprocessingsys.dto.request.EmailPayload;
 import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
+import com.trongtin.asyncprocessingsys.service.EmailService;
+import com.trongtin.asyncprocessingsys.service.WebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import jakarta.mail.internet.MimeMessage;
 import java.util.UUID;
 
 @Component
@@ -27,136 +25,114 @@ public class EmailWorker {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final JobRepository jobRepository;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
+    private final WebhookService webhookService;
     private final ObjectMapper objectMapper;
-  //  private final WebhookService webhookService;   // 👈 thêm
 
-    private static final String EMAIL_QUEUE = "queue:email";
+    private static final String EMAIL_QUEUE      = "queue:email";
+    private static final String DEAD_LETTER_QUEUE = "queue:dead-letter";
 
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────
     // Poll queue:email mỗi 2 giây
-    // fixedDelay: chờ 2s SAU KHI lần trước xong
-    // tránh overlap nếu xử lý lâu hơn 2s
-    // ─────────────────────────────────────────────
-    @Scheduled(fixedDelay = 2000)
+    //
+    // fixedDelay = chờ 2s SAU KHI lần trước xong
+    // Khác với fixedRate = chạy mỗi 2s dù lần trước chưa xong
+    // fixedDelay an toàn hơn — tránh overlap
+    // ─────────────────────────────────────────────────────────
+    @Scheduled(fixedDelay = 10000)
     public void pollQueue() {
-        // RPOP lấy jobId từ cuối queue — trả null nếu queue rỗng
+        // RPOP lấy từ cuối queue (FIFO: LPUSH đầu, RPOP cuối)
         String jobIdStr = redisTemplate.opsForList().rightPop(EMAIL_QUEUE);
 
-        if (jobIdStr == null) {
-            // Queue rỗng — không log để tránh spam console
-            return;
-        }
+        // Queue rỗng — return ngay, không log tránh spam
+        if (jobIdStr == null) return;
 
-        log.info("[EmailWorker] Picked job from queue | jobId={}", jobIdStr);
+        log.info("[EmailWorker] Dequeued | jobId={}", jobIdStr);
         processJob(jobIdStr);
     }
 
-    // ─────────────────────────────────────────────
-    // Xử lý từng job
-    // @Retryable: tự retry tối đa 3 lần nếu lỗi
-    // delay tăng dần: 2s → 4s → 8s (multiplier=2)
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────
+    // Xử lý job
+    //
+    // @Retryable sẽ tự retry nếu method ném exception
+    //   - maxAttempts = 3: thử tối đa 3 lần
+    //   - delay = 2000: lần đầu chờ 2s
+    //   - multiplier = 2: mỗi lần sau nhân đôi → 2s, 4s, 8s
+    // ─────────────────────────────────────────────────────────
     @Retryable(
-            retryFor  = { Exception.class },
+            retryFor    = {Exception.class},
             maxAttempts = 3,
-            backoff  = @Backoff(delay = 2000, multiplier = 2)
+            backoff     = @Backoff(delay = 2000, multiplier = 2)
     )
     public void processJob(String jobIdStr) {
         UUID jobId = UUID.fromString(jobIdStr);
 
         // Bước 1: Tìm job trong DB
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> {
-                    log.error("[EmailWorker] Job not found | jobId={}", jobIdStr);
-                    return new RuntimeException("Job not found: " + jobIdStr);
-                });
+        Job job = jobRepository.findById(jobId).orElseThrow(
+                () -> new RuntimeException("Job not found: " + jobIdStr));
 
-        // Bước 2: Cập nhật status PROCESSING
+        // Bước 2: Đánh dấu đang xử lý
         job.setStatus(JobStatus.PROCESSING);
         jobRepository.save(job);
         log.info("[EmailWorker] Processing | jobId={}", jobId);
 
         try {
-            // Bước 3: Parse payload JSON
+            // Bước 3: Parse payload JSON → EmailPayload object
             EmailPayload payload = objectMapper.readValue(
                     job.getPayload(), EmailPayload.class);
 
             // Bước 4: Gửi email
-            sendEmail(payload);
+            emailService.send(payload);
 
             // Bước 5: Cập nhật DONE
             job.setStatus(JobStatus.DONE);
             jobRepository.save(job);
-            log.info("[EmailWorker] Done | jobId={} | to={}", jobId, payload.getTo());
+            log.info("[EmailWorker] Done | jobId={} | to={}",
+                    jobId, payload.getTo());
 
-            // Bước 6: Notify client qua webhook
-          //  webhookService.deliver(job);   // 👈 thêm
+            // Bước 6: Gọi webhook notify client
+            // Chạy trên webhookExecutor — không block worker thread này
+            webhookService.deliver(job);
 
         } catch (Exception e) {
-            log.error("[EmailWorker] Failed | jobId={} | error={}", jobId, e.getMessage());
+            log.error("[EmailWorker] Error | jobId={} | msg={}",
+                    jobId, e.getMessage());
             // Ném lại để @Retryable bắt và retry
-            throw new RuntimeException("Email processing failed: " + e.getMessage(), e);
+            throw new RuntimeException("Email job failed: " + e.getMessage(), e);
         }
     }
 
-    // ─────────────────────────────────────────────
-    // Gửi email qua JavaMailSender
-    // ─────────────────────────────────────────────
-    private void sendEmail(EmailPayload payload) throws Exception {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setFrom("noreply@asyncjob.com");
-        helper.setTo(payload.getTo());
-        helper.setSubject(payload.getSubject());
-        // true = HTML content
-        helper.setText(buildHtmlBody(payload.getBody()), true);
-
-        mailSender.send(message);
-        log.debug("[EmailWorker] Email sent | to={}", payload.getTo());
-    }
-
-    // ─────────────────────────────────────────────
-    // Template HTML đơn giản cho email
-    // ─────────────────────────────────────────────
-    private String buildHtmlBody(String content) {
-        return """
-            <html>
-            <body style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2 style="color: #333;">Thông báo từ Async Job System</h2>
-                <p>%s</p>
-                <hr/>
-                <small style="color: #999;">Email được gửi tự động, vui lòng không reply.</small>
-            </body>
-            </html>
-            """.formatted(content);
-    }
-
-    // ─────────────────────────────────────────────
-    // @Recover: chạy khi đã hết tất cả retry
-    // Cập nhật status FAILED và đẩy vào Dead Letter Queue
-    // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────
+    // @Recover chạy sau khi hết tất cả retry
+    //
+    // Lưu ý: signature phải có Exception là tham số đầu tiên
+    // + đúng các tham số của method gốc
+    // ─────────────────────────────────────────────────────────
     @Recover
     public void recover(RuntimeException e, String jobIdStr) {
-        log.error("[EmailWorker] Max retry reached | jobId={} | error={}",
+        log.error("[EmailWorker] All retries failed | jobId={} | error={}",
                 jobIdStr, e.getMessage());
 
         try {
             UUID jobId = UUID.fromString(jobIdStr);
             Job job = jobRepository.findById(jobId).orElse(null);
+
             if (job != null) {
+                // Đánh dấu FAILED
                 job.setStatus(JobStatus.FAILED);
                 job.setRetryCount(job.getRetryCount() + 1);
                 jobRepository.save(job);
+
+                // Notify client biết job thất bại
+                webhookService.deliver(job);
             }
 
-            // Đẩy vào Dead Letter Queue
-            redisTemplate.opsForList().leftPush("queue:dead-letter", jobIdStr);
-            log.warn("[EmailWorker] Pushed to DLQ | jobId={}", jobIdStr);
-
         } catch (Exception ex) {
-            log.error("[EmailWorker] Recover failed | jobId={}", jobIdStr, ex);
+            log.error("[EmailWorker] Recover error | jobId={}", jobIdStr, ex);
+        } finally {
+            // Luôn đẩy vào Dead Letter Queue dù có lỗi hay không
+            redisTemplate.opsForList().leftPush(DEAD_LETTER_QUEUE, jobIdStr);
+            log.warn("[EmailWorker] Pushed to DLQ | jobId={}", jobIdStr);
         }
     }
 }

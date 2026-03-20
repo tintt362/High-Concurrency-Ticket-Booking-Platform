@@ -1,5 +1,6 @@
 package com.trongtin.asyncprocessingsys.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trongtin.asyncprocessingsys.dto.request.CreateJobRequest;
 import com.trongtin.asyncprocessingsys.dto.response.JobResponse;
 import com.trongtin.asyncprocessingsys.model.Job;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 

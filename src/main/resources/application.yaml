@@ -47,6 +47,8 @@ app:
     pdf-dir: uploads/pdf
     base-url: http://localhost:8080/files
 
+  email:
+    from: "Async Job System <noreply@asyncjob.com>"
 logging:
   level:
     com.example: DEBUG
