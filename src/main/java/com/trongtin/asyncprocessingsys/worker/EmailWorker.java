@@ -42,6 +42,7 @@ public class EmailWorker {
     @Scheduled(fixedDelay = 10000)
     public void pollQueue() {
         // RPOP lấy từ cuối queue (FIFO: LPUSH đầu, RPOP cuối)
+        log.warn("Size Queue: " + redisTemplate.opsForList().size(EMAIL_QUEUE));
         String jobIdStr = redisTemplate.opsForList().rightPop(EMAIL_QUEUE);
 
         // Queue rỗng — return ngay, không log tránh spam
