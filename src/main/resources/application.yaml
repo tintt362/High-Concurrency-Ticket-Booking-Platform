@@ -77,3 +77,18 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ── Cấu hình Ollama AI ──────────────────────────────
+ollama:
+  base-url: http://localhost:11434
+  # Nếu chạy trong Docker thì đổi thành:
+  # base-url: http://host.docker.internal:11434
+
+  model: llama3.2:3b
+  # Đổi thành llama3.2:8b nếu máy có RAM 16GB+
+
+  enabled: true
+  # Đặt false để tắt toàn bộ AI — hệ thống vẫn chạy bình thường
+
+  timeout-seconds: 120
+  # AI cần thời gian suy nghĩ — timeout 2 phút

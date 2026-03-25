@@ -1,5 +1,6 @@
 package com.trongtin.asyncprocessingsys.model;
 
+import com.trongtin.asyncprocessingsys.model.enums.JobPriority;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.model.enums.WebhookStatus;
@@ -49,6 +50,21 @@ public class Job {
 
     @Builder.Default
     private int retryCount = 0;
+
+    // Thêm vào sau field result — KHÔNG xóa gì cũ
+    @Column(columnDefinition = "TEXT")
+    private String aiSummary;
+// AI tóm tắt nội dung PDF (do ReportAnalyzerAI tạo)
+
+    // Thêm vào Job.java cùng chỗ với aiSummary
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    @Builder.Default
+    private JobPriority priority = JobPriority.MEDIUM;
+
+    @Column(columnDefinition = "TEXT")
+    private String aiInsights;
+// AI đề xuất hành động (do ReportAnalyzerAI tạo)
 
     @CreationTimestamp
     private LocalDateTime createdAt;

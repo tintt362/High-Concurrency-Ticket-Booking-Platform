@@ -19,5 +19,10 @@ public class JobResponse {
     private JobStatus status;
     private String result;
     private WebhookStatus webhookStatus;
+
+    // Thêm vào cuối class JobResponse, KHÔNG xóa gì cũ
+    private String aiSummary;
+    private String aiInsights;
+
     private LocalDateTime createdAt;
 }
