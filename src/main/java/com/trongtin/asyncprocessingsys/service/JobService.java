@@ -1,9 +1,11 @@
 package com.trongtin.asyncprocessingsys.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trongtin.asyncprocessingsys.ai.JobClassifierAI;
 import com.trongtin.asyncprocessingsys.dto.request.CreateJobRequest;
 import com.trongtin.asyncprocessingsys.dto.response.JobResponse;
 import com.trongtin.asyncprocessingsys.model.Job;
+import com.trongtin.asyncprocessingsys.model.enums.JobPriority;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
@@ -28,23 +30,47 @@ public class JobService {
     private static final String EMAIL_QUEUE    = "queue:email";
     private static final String PDF_QUEUE      = "queue:pdf";
 
+    private final JobClassifierAI jobClassifierAI;
+
+    // Queue names — thêm mới, KHÔNG xóa queue cũ
+    private static final String EMAIL_QUEUE_HIGH   = "queue:email:high";
+    private static final String EMAIL_QUEUE_MEDIUM = "queue:email:medium";
+    private static final String EMAIL_QUEUE_LOW    = "queue:email:low";
+    private static final String PDF_QUEUE_HIGH     = "queue:pdf:high";
+    private static final String PDF_QUEUE_MEDIUM   = "queue:pdf:medium";
+    private static final String PDF_QUEUE_LOW      = "queue:pdf:low";
+
+
     public JobResponse createJob(CreateJobRequest request) {
+
+        // ── AI CLASSIFY trước khi save ──────────────────
+        // AI chạy trước khi lưu DB để có priority ngay từ đầu
+        JobPriority priority = jobClassifierAI.classify(
+                request.getPayload(),
+                request.getType()
+        );
+        // Nếu AI fail: priority = MEDIUM (default trong classify())
+
         // 1. Tạo và lưu job vào DB với status PENDING
         Job job = Job.builder()
                 .type(request.getType())
                 .status(JobStatus.PENDING)
                 .payload(request.getPayload())
                 .callbackUrl(request.getCallbackUrl())
+                .priority(priority)
                 .build();
 
         job = jobRepository.save(job);
-        log.info("[JobService] Created job | jobId={} | type={}", job.getId(), job.getType());
+        log.info("[JobService] Created | jobId={} | type={} | priority={}",
+                job.getId(), job.getType(), priority);
+        // Đẩy vào queue đúng với priority
+        String queueName = resolveQueueWithPriority(
+                request.getType(), priority);
+        redisTemplate.opsForList().leftPush(queueName,
+                job.getId().toString());
 
-        // 2. Đẩy jobId vào Redis queue tương ứng
-        String queueName = resolveQueue(request.getType());
-        redisTemplate.opsForList().leftPush(queueName, job.getId().toString());
-        log.info("[JobService] Pushed to queue | queue={} | jobId={}", queueName, job.getId());
-
+        log.info("[JobService] Enqueued | queue={} | jobId={}",
+                queueName, job.getId());
         return toResponse(job);
     }
 
@@ -54,6 +80,20 @@ public class JobService {
         return toResponse(job);
     }
 
+
+    private String resolveQueueWithPriority(JobType type,
+                                            JobPriority priority) {
+        String base = switch (type) {
+            case EMAIL      -> "queue:email";
+            case EXPORT_PDF -> "queue:pdf";
+        };
+        String suffix = switch (priority) {
+            case HIGH   -> ":high";
+            case MEDIUM -> ":medium";
+            case LOW    -> ":low";
+        };
+        return base + suffix;
+    }
     private String resolveQueue(JobType type) {
         return switch (type) {
             case EMAIL      -> EMAIL_QUEUE;

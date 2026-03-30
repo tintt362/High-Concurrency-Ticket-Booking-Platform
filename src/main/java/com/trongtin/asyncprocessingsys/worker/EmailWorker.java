@@ -44,10 +44,23 @@ public class EmailWorker {
     @Scheduled(fixedDelay = 10000)
     public void pollQueue() {
         // RPOP lấy từ cuối queue (FIFO: LPUSH đầu, RPOP cuối)
-        log.warn("Size Queue: " + redisTemplate.opsForList().size(EMAIL_QUEUE));
-        String jobIdStr = redisTemplate.opsForList().rightPop(EMAIL_QUEUE);
+        // HIGH được lấy ra trước tiên
+        String jobIdStr = redisTemplate.opsForList()
+                .rightPop("queue:email:high");
 
-        // Queue rỗng — return ngay, không log tránh spam
+        // Không có HIGH → thử MEDIUM
+        if (jobIdStr == null) {
+            jobIdStr = redisTemplate.opsForList()
+                    .rightPop("queue:email:medium");
+        }
+
+        // Không có MEDIUM → thử LOW
+        if (jobIdStr == null) {
+            jobIdStr = redisTemplate.opsForList()
+                    .rightPop("queue:email:low");
+        }
+
+        // Tất cả rỗng → không làm gì
         if (jobIdStr == null) return;
 
         log.info("[EmailWorker] Dequeued | jobId={}", jobIdStr);
