@@ -1,6 +1,7 @@
 package com.trongtin.asyncprocessingsys.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trongtin.asyncprocessingsys.ai.EmailComposerAI;
 import com.trongtin.asyncprocessingsys.dto.request.EmailPayload;
 import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
@@ -28,6 +29,7 @@ public class EmailWorker {
     private final EmailService emailService;
     private final WebhookService webhookService;
     private final ObjectMapper objectMapper;
+    private final EmailComposerAI emailComposerAI;
 
     private static final String EMAIL_QUEUE      = "queue:email";
     private static final String DEAD_LETTER_QUEUE = "queue:dead-letter";
@@ -81,7 +83,33 @@ public class EmailWorker {
             // Bước 3: Parse payload JSON → EmailPayload object
             EmailPayload payload = objectMapper.readValue(
                     job.getPayload(), EmailPayload.class);
+            // ── AI LAYER: Chỉ chạy nếu có context và chưa có body ──
+            if (payload.getBody() == null && payload.getContext() != null) {
 
+                String aiBody = emailComposerAI.generateBody(
+                        payload.getContext(),
+                        payload.getRecipientName()
+                );
+
+                // AI thành công → dùng body AI generate
+                // AI fail (null) → dùng context làm body thô (fallback)
+                // Hệ thống KHÔNG bao giờ fail vì AI
+                if (aiBody != null) {
+                    payload.setBody(aiBody);
+                    log.info("[EmailProcessor] Using AI-generated body | jobId={}", jobId);
+                } else {
+                    payload.setBody(payload.getContext());
+                    log.warn("[EmailProcessor] AI failed, using context as body | jobId={}", jobId);
+                }
+            }
+            // Suggest subject tốt hơn nếu có context
+            if (payload.getContext() != null && payload.getSubject() != null) {
+                String betterSubject = emailComposerAI.suggestSubject(
+                        payload.getSubject(), payload.getContext());
+                if (betterSubject != null) {
+                    payload.setSubject(betterSubject.trim());
+                }
+            }
             // Bước 4: Gửi email
             emailService.send(payload);
 
