@@ -7,8 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailPayload {
-    private String to;        // Địa chỉ nhận
+    private String to;
     private String subject;
-    private String recipientName; // Thêm field này// Tiêu đề
-    private String body;      // Nội dung
+    private String body;        // Có sẵn → dùng luôn, không cần AI
+    private String context;     // Mô tả ngắn → AI generate body
+    private String recipientName;
 }
