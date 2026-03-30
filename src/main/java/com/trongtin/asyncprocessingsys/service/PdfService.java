@@ -46,6 +46,7 @@ public class PdfService {
     // Màu text nhạt
     private static final DeviceRgb COLOR_TEXT_LIGHT = new DeviceRgb(127, 140, 141);
 
+
     // ─────────────────────────────────────────────────────────
     // Entry point — PdfWorker gọi vào đây
     // Trả về URL để client download

@@ -16,6 +16,7 @@ public class PdfPayload {
     // Tháng/kỳ báo cáo — "2024-11"
     private String period;
 
+    private String content;
     // Tên người yêu cầu — hiển thị trên PDF
     private String requestedBy;
 

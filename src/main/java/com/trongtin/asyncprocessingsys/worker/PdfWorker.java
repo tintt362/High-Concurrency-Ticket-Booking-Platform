@@ -2,6 +2,7 @@ package com.trongtin.asyncprocessingsys.worker;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trongtin.asyncprocessingsys.ai.ReportAnalyzerAI;
 import com.trongtin.asyncprocessingsys.dto.request.PdfPayload;
 import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
@@ -29,6 +30,8 @@ public class PdfWorker {
     private final PdfService pdfService;
     private final WebhookService webhookService;
     private final ObjectMapper objectMapper;
+
+    private final ReportAnalyzerAI reportAnalyzerAI;
 
     private static final String PDF_QUEUE        = "queue:pdf";
     private static final String DEAD_LETTER_QUEUE = "queue:dead-letter";
@@ -68,9 +71,19 @@ public class PdfWorker {
             // Bước 4: Generate PDF — trả về URL download
             String downloadUrl = pdfService.generate(jobId, payload);
 
+// ── AI ANALYZE: chạy sau khi PDF đã tạo xong ──
+// AI đọc payload data và tạo summary + insights
+            String summary  = reportAnalyzerAI.analyze(
+                    payload.getContent(), payload.getReportType());
+            String insights = reportAnalyzerAI.generateInsights(
+                    payload.getContent(), payload.getReportType());
+
             // Bước 5: Cập nhật DONE + lưu URL
+
             job.setStatus(JobStatus.DONE);
             job.setResult(downloadUrl);
+            job.setAiSummary(summary);    // ← lưu AI summary
+            job.setAiInsights(insights);  // ← lưu AI insights
             jobRepository.save(job);
             log.info("[PdfWorker] Done | jobId={} | url={}", jobId, downloadUrl);
 
