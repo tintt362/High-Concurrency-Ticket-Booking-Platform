@@ -7,16 +7,20 @@ networks:
 volumes:
   mysql_data:
   redis_data:
+  ollama_data:
 
 services:
   mysql:
     image: mysql:8.0
     container_name: async-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: root123a
       MYSQL_DATABASE: asyncjobdb
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin123
+
+      OLLAMA_BASE_URL: http://ollama:11434
+
     ports:
       - "3306:3306"
     volumes:
@@ -64,6 +68,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_started   # 👈 thêm
     networks:
       - async-net
   prometheus:
@@ -99,5 +105,16 @@ services:
     container_name: async-grafana
     ports:
       - "3000:3000"
+    networks:
+      - async-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: async-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: always
     networks:
       - async-net

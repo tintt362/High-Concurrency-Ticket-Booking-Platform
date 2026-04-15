@@ -34,16 +34,11 @@ public class ChatbotService {
             - Nếu không chắc → nói rõ không chắc, không bịa số liệu
             """;
 
-    // ─────────────────────────────────────────
-    // Trả lời câu hỏi bằng ngôn ngữ tự nhiên
-    //
+
     // Luồng:
     // 1. Lấy data thật từ DB và Redis
     // 2. Ghép data vào system prompt
     // 3. AI dùng data đó để trả lời
-    //
-    // Kết quả: AI trả lời chính xác vì có data thật
-    // ─────────────────────────────────────────
     public String chat(String userQuestion) {
         log.info("[Chatbot] Question: {}", userQuestion);
 
@@ -66,7 +61,6 @@ public class ChatbotService {
 
     // ─────────────────────────────────────────
     // Lấy data thật từ DB và Redis
-    // AI dùng data này để trả lời chính xác
     // ─────────────────────────────────────────
     private String buildSystemContext() {
         try {

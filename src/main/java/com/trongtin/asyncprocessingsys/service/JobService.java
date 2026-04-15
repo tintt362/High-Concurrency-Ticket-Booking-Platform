@@ -11,9 +11,12 @@ import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
 
 // service/JobService.java
@@ -27,18 +30,18 @@ public class JobService {
     private final ObjectMapper objectMapper;
 
     // Tên các queue trong Redis
-    private static final String EMAIL_QUEUE    = "queue:email";
-    private static final String PDF_QUEUE      = "queue:pdf";
+    private static final String EMAIL_QUEUE = "queue:email";
+    private static final String PDF_QUEUE = "queue:pdf";
 
     private final JobClassifierAI jobClassifierAI;
 
     // Queue names — thêm mới, KHÔNG xóa queue cũ
-    private static final String EMAIL_QUEUE_HIGH   = "queue:email:high";
+    private static final String EMAIL_QUEUE_HIGH = "queue:email:high";
     private static final String EMAIL_QUEUE_MEDIUM = "queue:email:medium";
-    private static final String EMAIL_QUEUE_LOW    = "queue:email:low";
-    private static final String PDF_QUEUE_HIGH     = "queue:pdf:high";
-    private static final String PDF_QUEUE_MEDIUM   = "queue:pdf:medium";
-    private static final String PDF_QUEUE_LOW      = "queue:pdf:low";
+    private static final String EMAIL_QUEUE_LOW = "queue:email:low";
+    private static final String PDF_QUEUE_HIGH = "queue:pdf:high";
+    private static final String PDF_QUEUE_MEDIUM = "queue:pdf:medium";
+    private static final String PDF_QUEUE_LOW = "queue:pdf:low";
 
 
     public JobResponse createJob(CreateJobRequest request) {
@@ -63,14 +66,20 @@ public class JobService {
         job = jobRepository.save(job);
         log.info("[JobService] Created | jobId={} | type={} | priority={}",
                 job.getId(), job.getType(), priority);
-        // Đẩy vào queue đúng với priority
-        String queueName = resolveQueueWithPriority(
-                request.getType(), priority);
-        redisTemplate.opsForList().leftPush(queueName,
-                job.getId().toString());
+// ── XADD vào Stream thay vì LPUSH vào List ──────────
+        String streamKey = resolveStream(request.getType(), priority);
 
-        log.info("[JobService] Enqueued | queue={} | jobId={}",
-                queueName, job.getId());
+        // MapRecord: message là một Map<String, String>
+        // Lưu jobId và type để worker biết cần lấy job nào
+        RecordId recordId = redisTemplate.opsForStream().add(
+                MapRecord.create(streamKey, Map.of(
+                        "jobId", job.getId().toString(),
+                        "type", request.getType().name()
+                ))
+        );
+        log.info("[JobService] Created | recordId={} ",
+                recordId);
+                // ────────────────────────────────
         return toResponse(job);
     }
 
@@ -81,24 +90,20 @@ public class JobService {
     }
 
 
-    private String resolveQueueWithPriority(JobType type,
-                                            JobPriority priority) {
+    // Chọn stream theo type + priority
+    private String resolveStream(JobType type, JobPriority priority) {
         String base = switch (type) {
-            case EMAIL      -> "queue:email";
-            case EXPORT_PDF -> "queue:pdf";
+            case EMAIL -> "stream:email";
+            case EXPORT_PDF -> "stream:pdf";
         };
         String suffix = switch (priority) {
-            case HIGH   -> ":high";
+            case HIGH -> ":high";
             case MEDIUM -> ":medium";
-            case LOW    -> ":low";
+            case LOW -> ":low";
         };
+        log.info("[JopType After Resolve]  | type={} | priority={} | Result={}" , base, priority, base + suffix);
+
         return base + suffix;
-    }
-    private String resolveQueue(JobType type) {
-        return switch (type) {
-            case EMAIL      -> EMAIL_QUEUE;
-            case EXPORT_PDF -> PDF_QUEUE;
-        };
     }
 
     private JobResponse toResponse(Job job) {

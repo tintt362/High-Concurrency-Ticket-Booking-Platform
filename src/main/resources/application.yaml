@@ -1,13 +1,13 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/asyncjobdb
-    username: admin
+    username: root
     password: admin123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -16,9 +16,10 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
-      timeout: 2000ms
+      connect-timeout: 5000ms # Thời gian kết nối
+      timeout: 5000ms         # Tăng lên 5 giây thay vì 2 giây mặc định
+      lettuce:
+        shutdown-timeout: 200ms
 
   # ── Mailtrap: inbox test email, đăng ký free tại mailtrap.io ──
   mail:
@@ -84,7 +85,7 @@ ollama:
   # Nếu chạy trong Docker thì đổi thành:
   # base-url: http://host.docker.internal:11434
 
-  model: llama3.2:3b
+  model: gemma3:4b
   # Đổi thành llama3.2:8b nếu máy có RAM 16GB+
 
   enabled: true

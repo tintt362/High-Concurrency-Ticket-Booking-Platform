@@ -11,8 +11,7 @@ public class EmailComposerAI {
 
     private final OllamaService ollamaService;
 
-    // System prompt định nghĩa "tính cách" của AI
-    // Viết một lần, dùng cho mọi request
+    // System prompt role AI
     private static final String COMPOSE_SYSTEM_PROMPT = """
             Bạn là chuyên gia viết email chuyên nghiệp cho phần mềm SaaS.
             
@@ -34,16 +33,6 @@ public class EmailComposerAI {
             Quy tắc: Chỉ trả về 1 subject line, dưới 60 ký tự, không giải thích.
             """;
 
-    // ─────────────────────────────────────────
-    // Sinh HTML email từ context ngắn
-    //
-    // context: mô tả mục đích email
-    //   Ví dụ: "Chào mừng user mới đăng ký, nhắc xác thực email"
-    //
-    // recipientName: tên người nhận để AI xưng hô đúng
-    //
-    // Return: HTML string, hoặc null nếu AI fail
-    // ─────────────────────────────────────────
     public String generateBody(String context, String recipientName) {
         if (context == null || context.isBlank()) return null;
 
