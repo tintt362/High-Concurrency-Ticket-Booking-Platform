@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync        // bật @Async toàn app
-@EnableScheduling   // bật @Scheduled cho worker poll queue
+@EnableScheduling
 @Slf4j
 public class AsyncConfig {
 

@@ -28,10 +28,7 @@ public class OllamaService {
 
     @Value("${ollama.enabled:true}")
     private boolean enabled;
-    // :true = giá trị mặc định nếu không có trong yml
 
-    // Dùng RestTemplateBuilder để set timeout riêng cho AI
-    // AI xử lý lâu hơn REST API thường — cần timeout dài hơn
     public OllamaService(RestTemplateBuilder builder,
                          ObjectMapper objectMapper) {
         this.restTemplate = builder.setConnectTimeout(Duration.ofSeconds(5))
@@ -43,13 +40,8 @@ public class OllamaService {
 
     // ─────────────────────────────────────────────────────
     // METHOD CHÍNH: Gửi prompt → nhận text response
-    //
     // systemPrompt: Định nghĩa "vai trò" của AI
-    //   Ví dụ: "Bạn là chuyên gia viết email chuyên nghiệp"
-    //
     // userMessage: Câu hỏi / yêu cầu cụ thể
-    //   Ví dụ: "Viết email chào mừng cho Nguyễn Văn A"
-    //
     // QUAN TRỌNG: Trả về null nếu AI fail
     // Caller PHẢI kiểm tra null và dùng fallback
     // ─────────────────────────────────────────────────────

@@ -25,12 +25,9 @@ public class JobClassifierAI {
             Không giải thích, không thêm gì khác.
             """;
 
-    // ─────────────────────────────────────────
     // Phân loại priority từ nội dung job
-    //
-    // Nếu AI fail → trả MEDIUM (an toàn nhất)
+    // Nếu AI fail → trả MEDIUM
     // Không bao giờ để AI failure làm job mất đi
-    // ─────────────────────────────────────────
     public JobPriority classify(String payload, JobType type) {
         if (payload == null) return JobPriority.MEDIUM;
 
