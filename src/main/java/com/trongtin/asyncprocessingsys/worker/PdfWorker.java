@@ -68,17 +68,12 @@ public class PdfWorker {
             PdfPayload payload = objectMapper.readValue(
                     job.getPayload(), PdfPayload.class);
 
-            // Bước 4: Generate PDF — trả về URL download
             String downloadUrl = pdfService.generate(jobId, payload);
-
-// ── AI ANALYZE: chạy sau khi PDF đã tạo xong ──
-// AI đọc payload data và tạo summary + insights
             String summary  = reportAnalyzerAI.analyze(
                     payload.getContent(), payload.getReportType());
             String insights = reportAnalyzerAI.generateInsights(
                     payload.getContent(), payload.getReportType());
 
-            // Bước 5: Cập nhật DONE + lưu URL
 
             job.setStatus(JobStatus.DONE);
             job.setResult(downloadUrl);
@@ -87,7 +82,6 @@ public class PdfWorker {
             jobRepository.save(job);
             log.info("[PdfWorker] Done | jobId={} | url={}", jobId, downloadUrl);
 
-            // Bước 6: Webhook notify client kèm download URL
             webhookService.deliver(job);
 
         } catch (Exception e) {

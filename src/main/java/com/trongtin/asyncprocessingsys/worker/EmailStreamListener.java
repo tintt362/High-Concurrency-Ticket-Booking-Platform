@@ -30,14 +30,7 @@ public class EmailStreamListener
     // Constant tên group — phải khớp với StreamConfig
     private static final String EMAIL_GROUP = "email-workers";
 
-    // ─────────────────────────────────────────────────────
-    // Method này được gọi TỰ ĐỘNG khi có message mới
-    // Không cần @Scheduled, không cần poll thủ công
-    //
-    // record.getId()     = message ID (timestamp-sequence)
-    // record.getStream() = tên stream (stream:email:high)
-    // record.getValue()  = Map { "jobId": "...", "type": "EMAIL" }
-    // ─────────────────────────────────────────────────────
+
     @Override
     public void onMessage(MapRecord<String, String, String> record) {
         String streamKey = record.getStream();
@@ -47,23 +40,16 @@ public class EmailStreamListener
                 streamKey, messageId);
 
         try {
-            // Lấy jobId từ message payload
             String jobIdStr = record.getValue().get("jobId");
 
             if (jobIdStr == null || jobIdStr.isBlank()) {
                 log.error("[EmailStreamListener] Missing jobId | msgId={}", messageId);
-                // ACK để không bị stuck trong pending list
                 ackMessage(streamKey, messageId);
                 return;
             }
 
-            // Xử lý job — có @Retryable bên trong
             emailJobProcessor.processJob(jobIdStr);
 
-            // ── ACK sau khi xử lý thành công ──────────────
-            // Chỉ ACK khi job xử lý XONG — không ACK sớm
-            // Nếu crash trước khi ACK → message còn trong PEL
-            // → PendingMessageRecovery sẽ re-deliver
             ackMessage(streamKey, messageId);
             log.info("[EmailStreamListener] ACK | msgId={} | jobId={}",
                     messageId, jobIdStr);
@@ -73,7 +59,6 @@ public class EmailStreamListener
                     messageId, e.getMessage());
 
             try {
-                // Lấy thông tin pending của chính message này
                 PendingMessages pendingMessages = redisTemplate.opsForStream()
                         .pending(
                                 streamKey,
@@ -97,11 +82,9 @@ public class EmailStreamListener
                         messageId, ex.getMessage());
             }
 
-            // KHÔNG ACK → để retry
         }
     }
 
-    // Helper: ACK message để xóa khỏi Pending Entry List
     private void ackMessage(String streamKey, String messageId) {
         redisTemplate.opsForStream().acknowledge(
                 streamKey,

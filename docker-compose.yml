@@ -14,12 +14,11 @@ services:
     image: mysql:8.0
     container_name: async-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root123a
-      MYSQL_DATABASE: asyncjobdb
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin123
-
-      OLLAMA_BASE_URL: http://ollama:11434
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
 
     ports:
       - "3306:3306"
@@ -55,10 +54,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Dùng tên service để kết nối nội bộ
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/asyncjobdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
     volumes:
@@ -86,7 +84,6 @@ services:
     container_name: async-loki
     ports:
       - "3100:3100"
-    # Dùng cấu hình mặc định để tránh lỗi thiếu file local-config.yaml
     networks:
       - async-net
 

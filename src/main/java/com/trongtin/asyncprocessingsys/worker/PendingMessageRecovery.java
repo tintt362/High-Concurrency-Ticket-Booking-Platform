@@ -23,8 +23,7 @@ public class PendingMessageRecovery {
     private final RedisTemplate<String, String> redisTemplate;
     private final EmailStreamListener emailStreamListener;
 
-    // Thời gian tối thiểu message ở trong PEL trước khi recovery
-    // 30s = worker có 30s để xử lý, sau đó mới bị coi là stuck
+
     private static final long PENDING_TIMEOUT_MS = 30_000;
 
     // Max số lần retry — tránh loop vô hạn
@@ -36,14 +35,6 @@ public class PendingMessageRecovery {
             StreamConfig.EMAIL_STREAM_LOW
     );
 
-    // ─────────────────────────────────────────────────────
-    // Chạy mỗi 30 giây — quét PEL tìm message bị stuck
-    //
-    // Luồng:
-    // 1. Tìm message đã pending > 30s (worker có thể đã crash)
-    // 2. Nếu delivery count < MAX → XCLAIM và xử lý lại
-    // 3. Nếu delivery count >= MAX → đưa vào Dead Letter Stream
-    // ─────────────────────────────────────────────────────
     @Scheduled(fixedDelay = 30_000)
     public void recoverPendingMessages() {
         for (String streamKey : STREAMS) {
@@ -53,8 +44,7 @@ public class PendingMessageRecovery {
 
     private void recoverStream(String streamKey) {
         try {
-            // Lấy danh sách pending messages
-            // Range.unbounded() = tất cả message ID từ "-" đến "+"
+
             PendingMessages pendingMessages = redisTemplate
                     .opsForStream()
                     .pending(
@@ -92,15 +82,11 @@ public class PendingMessageRecovery {
         log.warn("[Recovery] Stuck message | stream={} | msgId={} | pending={}ms | retries={}",
                 streamKey, messageId, pendingMs, deliveryCount);
 
-        // Quá nhiều lần retry → đưa vào Dead Letter Stream
         if (deliveryCount >= MAX_DELIVERY_COUNT) {
             moveToDeadLetter(streamKey, messageId);
             return;
         }
 
-        // XCLAIM: chuyển ownership của message
-        // Từ: worker cũ (có thể đã crash)
-        // Sang: "recovery-worker" để xử lý lại
         try {
             List<MapRecord<String, Object, Object>> claimed =
                     redisTemplate.opsForStream().claim(
@@ -115,15 +101,10 @@ public class PendingMessageRecovery {
 
             if (!claimed.isEmpty()) {
                 log.info("[Recovery] Claimed message | msgId={}", messageId);
-
-                // Re-process message đã claimed
-                // Cast về đúng type
                 MapRecord<String, Object, Object> record = claimed.get(0);
                 String jobIdStr = (String) record.getValue().get("jobId");
 
                 if (jobIdStr != null) {
-                    // Dùng lại EmailStreamListener để xử lý
-                    // Tạo record mới với đúng type
                     MapRecord<String, String, String> typedRecord =
                             MapRecord.create(
                                     streamKey,

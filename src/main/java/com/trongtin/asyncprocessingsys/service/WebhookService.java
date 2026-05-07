@@ -29,7 +29,6 @@ public class WebhookService {
     private static final long[] RETRY_DELAYS = {10, 30, 90};
     private static final int MAX_RETRY = 3;
 
-    // Chạy trên webhookExecutor — không block worker thread
     @Async("webhookExecutor")
     public void deliver(Job job) {
         if (job.getCallbackUrl() == null || job.getCallbackUrl().isBlank()) {
@@ -69,12 +68,10 @@ public class WebhookService {
             long delaySec = RETRY_DELAYS[attempt];
             log.info("[WebhookService] Retry in {}s | jobId={}", delaySec, job.getId());
 
-            // Schedule retry — không block thread hiện tại
             CompletableFuture
                     .delayedExecutor(delaySec, TimeUnit.SECONDS)
                     .execute(() -> attemptDelivery(job, attempt + 1));
 
-            // Ghi lại số lần retry
             job.setRetryCount(attempt + 1);
             jobRepository.save(job);
 
