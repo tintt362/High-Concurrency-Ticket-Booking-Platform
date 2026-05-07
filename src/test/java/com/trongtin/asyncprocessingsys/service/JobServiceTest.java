@@ -24,7 +24,9 @@ import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
 import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,5 +89,20 @@ public class JobServiceTest {
                 .save(any(Job.class));
 
         verify(streamOperations, times(1))
-                .add(any(MapRecord.class));    }
+                .add(any(MapRecord.class));
+    }
+
+    @Test
+    void shouldTestGetStatusJob() {
+        UUID mockId = UUID.randomUUID();
+        Job savedJob = Job.builder()
+                .id(mockId)
+                .type(request.getType())
+                .status(JobStatus.PENDING)
+                .priority(JobPriority.HIGH)
+                .build();
+        when(jobRepository.findById(mockId)).thenReturn(Optional.ofNullable(savedJob));
+        JobResponse jobResponse = jobService.getJobStatus(mockId);
+
+        assertThat(savedJob.getStatus()).isEqualTo(jobResponse.getStatus());    }
 }
