@@ -38,7 +38,6 @@ public class EmailServiceTest {
 
     @BeforeEach
     void initData() {
-        // Tiêm giá trị vào field @Value vì Unit Test không load file properties tự động
         ReflectionTestUtils.setField(emailService, "fromAddress", "test@system.com");
 
         payload = new EmailPayload();

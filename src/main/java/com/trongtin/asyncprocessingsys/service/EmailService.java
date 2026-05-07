@@ -20,19 +20,15 @@ public class EmailService {
     @Value("${app.email.from}")
     private String fromAddress;
 
-    // Entry point — worker gọi vào đây
     public void send(EmailPayload payload) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
 
-        // true = multipart (hỗ trợ HTML + attachment sau này)
-        // "UTF-8" = tránh lỗi tiếng Việt
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setFrom(fromAddress);
         helper.setTo(payload.getTo());
         helper.setSubject(payload.getSubject());
 
-        // Dùng template HTML, true = là HTML không phải plain text
         String htmlBody = buildHtmlTemplate(payload);
         helper.setText(htmlBody, true);
 
@@ -41,7 +37,6 @@ public class EmailService {
                 payload.getTo(), payload.getSubject());
     }
 
-    // Template HTML — có thể thay bằng Thymeleaf sau này
     private String buildHtmlTemplate(EmailPayload payload) {
         String greeting = payload.getRecipientName() != null
                 ? "Xin chào <strong>" + payload.getRecipientName() + "</strong>,"
