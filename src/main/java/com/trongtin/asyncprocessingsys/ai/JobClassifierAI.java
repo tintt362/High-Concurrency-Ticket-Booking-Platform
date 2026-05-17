@@ -2,6 +2,7 @@ package com.trongtin.asyncprocessingsys.ai;
 
 import com.trongtin.asyncprocessingsys.model.enums.JobPriority;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class JobClassifierAI {
     // Phân loại priority từ nội dung job
     // Nếu AI fail → trả MEDIUM
     // Không bao giờ để AI failure làm job mất đi
+    @CircuitBreaker(name = "ollamaService", fallbackMethod = "fallbackClassify")
     public JobPriority classify(String payload, JobType type) {
         if (payload == null) return JobPriority.MEDIUM;
 
@@ -56,5 +58,10 @@ public class JobClassifierAI {
         if (cleaned.contains("LOW"))    return JobPriority.LOW;
         return JobPriority.MEDIUM;
         // Mặc định MEDIUM nếu AI trả về thứ không rõ ràng
+    }
+    public JobPriority fallbackClassify(String payload, String type, Throwable throwable) {
+        log.error("Ollama AI đang gặp sự cố ({}), kích hoạt Fallback tự động gán MEDIUM", throwable.getMessage());
+        // Chiến lược an toàn: Mặc định gán độ ưu tiên MEDIUM nếu AI sập
+        return JobPriority.MEDIUM;
     }
 }

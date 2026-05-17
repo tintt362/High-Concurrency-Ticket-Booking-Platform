@@ -9,6 +9,7 @@ import com.trongtin.asyncprocessingsys.model.enums.JobPriority;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.stream.MapRecord;
@@ -41,7 +42,7 @@ public class JobService {
     private static final String PDF_QUEUE_MEDIUM = "queue:pdf:medium";
     private static final String PDF_QUEUE_LOW = "queue:pdf:low";
 
-
+    @RateLimiter(name = "createJob", fallbackMethod = "fallbackCreateJob")
     public JobResponse createJob(CreateJobRequest request) {
 
         JobPriority priority = jobClassifierAI.classify(
@@ -73,7 +74,14 @@ public class JobService {
         // ────────────────────────────────
         return toResponse(job);
     }
+    public JobResponse fallbackCreateJob(CreateJobRequest request, Throwable throwable) {
+        log.error("Rate limit exceeded for type={} | error={}", request.getType(), throwable.getMessage());
 
+        return JobResponse.builder()
+                .status(JobStatus.FAILED)
+                .result("Too many requests")
+                .build();
+    }
     public JobResponse getJobStatus(UUID jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found: " + jobId));

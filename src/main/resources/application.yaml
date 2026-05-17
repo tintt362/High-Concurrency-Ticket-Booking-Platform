@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DATASOURCE_URL}
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
+    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/asyncjobdb}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:admin123}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -24,8 +24,8 @@ spring:
   mail:
     host: sandbox.smtp.mailtrap.io
     port: 2525
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:ee68c3357c9725}
+    password: ${MAIL_PASSWORD:fb2e83f24305a1}
     properties:
       mail:
         smtp:
@@ -44,7 +44,7 @@ server:
 app:
   storage:
     pdf-dir: uploads/pdf
-    base-url: ${STORAGE_BASE_URL}
+    base-url: ${STORAGE_BASE_URL:http://localhost:8080/files}
 
   email:
     from: "Async Job System <noreply@asyncjob.com>"
@@ -74,7 +74,33 @@ logging:
 
 # ── Cấu hình Ollama AI ──────────────────────────────
 ollama:
-  base-url:  ${OLLAMA_BASE_URL}
+  base-url:  ${OLLAMA_BASE_URL:http://localhost:11434}
   model: gemma3:4b
   enabled: true
   timeout-seconds: 120
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ollamaService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        #        slidingWindowType: TIME_BASED
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+
+  ratelimiter:
+    instances:
+      createJob:
+        limitForPeriod: 2
+        limitRefreshPeriod: 10s
+        timeoutDuration: 0
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+      backendB:
+        limitForPeriod: 5
+        limitRefreshPeriod: 10s
+        timeoutDuration: 3s
