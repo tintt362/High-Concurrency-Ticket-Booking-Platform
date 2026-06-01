@@ -1,4 +1,4 @@
-package com.trongtin.asyncprocessingsys.service;
+package com.trongtin.asyncprocessingsys.service.ticket;
 
 import com.trongtin.asyncprocessingsys.dto.response.TicketDTO;
 import com.trongtin.asyncprocessingsys.model.command.CreateTicketCommand;
