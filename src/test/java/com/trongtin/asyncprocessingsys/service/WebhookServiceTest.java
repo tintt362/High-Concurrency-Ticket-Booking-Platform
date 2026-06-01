@@ -4,7 +4,6 @@ import com.trongtin.asyncprocessingsys.dto.response.WebhookPayload;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.model.enums.WebhookStatus;
-import com.trongtin.asyncprocessingsys.repository.JobRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

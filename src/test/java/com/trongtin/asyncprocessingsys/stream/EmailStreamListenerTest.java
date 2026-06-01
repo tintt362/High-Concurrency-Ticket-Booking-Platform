@@ -1,7 +1,5 @@
 package com.trongtin.asyncprocessingsys.stream;
 
-import com.trongtin.asyncprocessingsys.repository.JobRepository;
-import com.trongtin.asyncprocessingsys.service.WebhookService;
 import com.trongtin.asyncprocessingsys.worker.EmailStreamListener;
 import com.trongtin.asyncprocessingsys.worker.EmailWorker;
 import org.junit.jupiter.api.Test;
