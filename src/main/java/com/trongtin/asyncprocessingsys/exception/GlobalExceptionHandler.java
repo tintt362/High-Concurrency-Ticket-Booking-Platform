@@ -1,6 +1,5 @@
 package com.trongtin.asyncprocessingsys.exception;
 
-import com.trongtin.asyncprocessingsys.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

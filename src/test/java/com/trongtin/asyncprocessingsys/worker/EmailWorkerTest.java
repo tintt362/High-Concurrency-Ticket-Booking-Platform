@@ -2,7 +2,6 @@ package com.trongtin.asyncprocessingsys.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trongtin.asyncprocessingsys.ai.EmailComposerAI;
-import com.trongtin.asyncprocessingsys.dto.request.EmailPayload;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

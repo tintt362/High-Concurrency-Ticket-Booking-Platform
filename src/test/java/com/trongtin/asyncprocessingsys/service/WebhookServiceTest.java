@@ -1,6 +1,5 @@
 package com.trongtin.asyncprocessingsys.service;
 
-import com.trongtin.asyncprocessingsys.dto.response.WebhookPayload;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.model.enums.WebhookStatus;

@@ -1,6 +1,5 @@
 package com.trongtin.asyncprocessingsys.service;
 
-import com.trongtin.asyncprocessingsys.dto.request.EmailPayload;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.Properties;
 
 import static org.mockito.Mockito.*;
 
