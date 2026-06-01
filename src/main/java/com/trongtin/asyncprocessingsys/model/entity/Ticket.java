@@ -1,4 +1,4 @@
-package com.trongtin.asyncprocessingsys.model;
+package com.trongtin.asyncprocessingsys.model.entity;
 
 
 import jakarta.persistence.Entity;
