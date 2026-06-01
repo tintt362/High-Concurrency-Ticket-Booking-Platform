@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trongtin.asyncprocessingsys.ai.JobClassifierAI;
 import com.trongtin.asyncprocessingsys.dto.request.CreateJobRequest;
 import com.trongtin.asyncprocessingsys.dto.response.JobResponse;
-import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobPriority;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;

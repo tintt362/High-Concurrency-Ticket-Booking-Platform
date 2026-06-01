@@ -1,6 +1,5 @@
 package com.trongtin.asyncprocessingsys.repository;
 
-import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import org.springframework.data.jpa.repository.JpaRepository;

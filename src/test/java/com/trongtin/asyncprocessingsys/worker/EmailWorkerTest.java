@@ -3,7 +3,6 @@ package com.trongtin.asyncprocessingsys.worker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trongtin.asyncprocessingsys.ai.EmailComposerAI;
 import com.trongtin.asyncprocessingsys.dto.request.EmailPayload;
-import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
 import com.trongtin.asyncprocessingsys.service.EmailService;

@@ -13,13 +13,21 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-
+    jackson:
+      serialization:
+        indent-output: true
   data:
     redis:
-      connect-timeout: 5000ms
-      timeout: 5000ms
+      host: 127.0.0.1 # Host of the Redis server
+      port: 6319 # Port of the Redis server for connection
+      password: ""  # Password for connecting to the Redis server (default is empty)
       lettuce:
-        shutdown-timeout: 200ms
+        pool: # Connection pool settings
+          max-active: 10 # Maximum number of active connections in the pool (uses -1 for no limit)
+          max-idle: 5 # Maximum number of idle connections in the pool
+          min-idle: 5 # Minimum number of idle connections in the pool
+      #          max-wait: -1ms # Maximum wait time to get a connection from the pool (uses -1 for no limit)
+      connect-timeout: 30000 # Connection timeout (in milliseconds)
 
   mail:
     host: sandbox.smtp.mailtrap.io

@@ -1,7 +1,6 @@
 package com.trongtin.asyncprocessingsys.service;
 
 import com.trongtin.asyncprocessingsys.dto.response.WebhookPayload;
-import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.JobStatus;
 import com.trongtin.asyncprocessingsys.model.enums.JobType;
 import com.trongtin.asyncprocessingsys.model.enums.WebhookStatus;
@@ -17,8 +16,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.UUID;
-
-import static jakarta.persistence.GenerationType.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

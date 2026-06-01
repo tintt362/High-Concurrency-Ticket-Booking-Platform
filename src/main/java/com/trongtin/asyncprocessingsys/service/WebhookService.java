@@ -3,7 +3,6 @@ package com.trongtin.asyncprocessingsys.service;
 
 
 import com.trongtin.asyncprocessingsys.dto.response.WebhookPayload;
-import com.trongtin.asyncprocessingsys.model.Job;
 import com.trongtin.asyncprocessingsys.model.enums.WebhookStatus;
 import com.trongtin.asyncprocessingsys.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
