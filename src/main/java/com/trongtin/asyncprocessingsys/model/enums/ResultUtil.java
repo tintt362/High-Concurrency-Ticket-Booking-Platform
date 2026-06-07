@@ -1,6 +1,7 @@
-package com.xxxx.ddd.controller.model.enums;
+package com.trongtin.asyncprocessingsys.model.enums;
 
-import com.xxxx.ddd.controller.model.vo.ResultMessage;
+
+import com.trongtin.asyncprocessingsys.model.vo.ResultMessage;
 
 /**
  * Tiện ích trả về kết quả

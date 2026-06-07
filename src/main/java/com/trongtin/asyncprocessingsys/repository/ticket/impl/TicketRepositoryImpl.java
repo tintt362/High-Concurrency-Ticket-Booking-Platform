@@ -1,8 +1,10 @@
-package com.xxxx.ddd.infrastructure.persistence.repository;
+package com.trongtin.asyncprocessingsys.repository.ticket.impl;
 
-import com.xxxx.ddd.domain.model.entity.Ticket;
-import com.xxxx.ddd.domain.respository.TicketRepository;
-import com.xxxx.ddd.infrastructure.persistence.mapper.TicketJPAMapper;
+
+import com.trongtin.asyncprocessingsys.mapper.TicketJPAMapper;
+import com.trongtin.asyncprocessingsys.model.entity.Ticket;
+import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,5 @@ public class TicketRepositoryImpl implements TicketRepository {
         log.info("Finding all active tickets");
         return ticketJPAMapper.findByStatus(1);
     }
-
 
 }

@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.dto;
+package com.trongtin.asyncprocessingsys.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

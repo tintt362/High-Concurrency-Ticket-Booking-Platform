@@ -1,8 +1,8 @@
-package com.xxxx.ddd.infrastructure.persistence.repository;
+package com.trongtin.asyncprocessingsys.repository.ticket.impl;
 
-import com.xxxx.ddd.domain.model.entity.TicketDetail;
-import com.xxxx.ddd.domain.respository.TicketDetailRepository;
-import com.xxxx.ddd.infrastructure.persistence.mapper.TicketDetailJPAMapper;
+import com.trongtin.asyncprocessingsys.mapper.TicketDetailJPAMapper;
+import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketDetailRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

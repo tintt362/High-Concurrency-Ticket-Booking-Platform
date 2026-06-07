@@ -1,9 +1,10 @@
-package com.xxxx.ddd.controller.mapper;
+package com.trongtin.asyncprocessingsys.mapper;
 
-import com.xxxx.ddd.application.model.command.CreateTicketCommand;
-import com.xxxx.ddd.application.model.command.CreateTicketDetailCommand;
-import com.xxxx.ddd.controller.dto.CreateTicketDetailRequest;
-import com.xxxx.ddd.controller.dto.CreateTicketRequest;
+
+import com.trongtin.asyncprocessingsys.dto.request.CreateTicketDetailRequest;
+import com.trongtin.asyncprocessingsys.dto.request.CreateTicketRequest;
+import com.trongtin.asyncprocessingsys.model.command.CreateTicketCommand;
+import com.trongtin.asyncprocessingsys.model.command.CreateTicketDetailCommand;
 
 import java.math.BigDecimal;
 

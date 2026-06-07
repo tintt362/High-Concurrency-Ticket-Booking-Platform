@@ -2,6 +2,7 @@ package com.trongtin.asyncprocessingsys.repository.ticket;
 
 
 import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;

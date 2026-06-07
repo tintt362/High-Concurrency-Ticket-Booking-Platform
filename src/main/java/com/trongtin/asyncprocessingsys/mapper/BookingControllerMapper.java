@@ -1,7 +1,8 @@
-package com.xxxx.ddd.controller.mapper;
+package com.trongtin.asyncprocessingsys.mapper;
 
-import com.xxxx.ddd.application.model.command.CreateBookingCommand;
-import com.xxxx.ddd.controller.dto.CreateBookingRequest;
+
+import com.trongtin.asyncprocessingsys.dto.request.CreateBookingRequest;
+import com.trongtin.asyncprocessingsys.model.command.CreateBookingCommand;
 
 public class BookingControllerMapper {
 

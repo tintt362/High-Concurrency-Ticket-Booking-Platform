@@ -1,10 +1,9 @@
-package com.xxxx.ddd.controller.http;
+package com.trongtin.asyncprocessingsys.controller;
 
-import com.xxxx.ddd.application.model.TicketDetailDTO;
-import com.xxxx.ddd.application.service.ticket.TicketDetailAppService;
-import com.xxxx.ddd.controller.model.enums.ResultUtil;
-import com.xxxx.ddd.controller.model.vo.ResultMessage;
-import com.xxxx.ddd.domain.model.entity.TicketDetail;
+import com.trongtin.asyncprocessingsys.dto.response.TicketDetailDTO;
+import com.trongtin.asyncprocessingsys.model.enums.ResultUtil;
+import com.trongtin.asyncprocessingsys.model.vo.ResultMessage;
+import com.trongtin.asyncprocessingsys.service.ticket.TicketDetailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ public class TicketDetailController {
 
     // CALL Service Application
     @Autowired
-    private TicketDetailAppService ticketDetailAppService;
+    private TicketDetailService ticketDetailService;
 
     @GetMapping("/ping/java")
     public ResponseEntity<Object> ping() throws InterruptedException {
@@ -59,7 +58,7 @@ public class TicketDetailController {
             @PathVariable("detailId") Long detailId,
             @RequestParam(name = "version", required = false) Long version
     ) {
-        return ResultUtil.data(ticketDetailAppService.getTicketDetailById(detailId, version));
+        return ResultUtil.data(ticketDetailService.getTicketDetailById(detailId, version));
     }
 
     /**
@@ -73,6 +72,6 @@ public class TicketDetailController {
             @PathVariable("ticketId") Long ticketId,
             @PathVariable("detailId") Long detailId
     ) {
-        return ticketDetailAppService.orderTicketByUser(detailId);
+        return ticketDetailService.orderTicketByUser(detailId);
     }
 }

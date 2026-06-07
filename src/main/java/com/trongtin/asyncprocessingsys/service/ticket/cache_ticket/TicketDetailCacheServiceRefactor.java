@@ -8,6 +8,7 @@ import com.trongtin.asyncprocessingsys.cache.redis.RedisInfrasService;
 import com.trongtin.asyncprocessingsys.model.TicketDetailCache;
 import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
 import com.trongtin.asyncprocessingsys.repository.ticket.TicketDetailRepository;
+import com.trongtin.asyncprocessingsys.service.ticket.TicketDetailDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,13 @@ public class TicketDetailCacheServiceRefactor {
     @Autowired // Khai bao cache
     private RedisInfrasService redisInfrasService;
     @Autowired
-    private TicketDetailRepository ticketDetailRepository;
+    private TicketDetailDomainService ticketDetailDomainService;
 
     // private static final Logger log = LoggerFactory.getLogger(TicketDetailCacheService.class);
     // use guava
     private final static Cache<Long, TicketDetailCache> ticketDetailLocalCache = CacheBuilder.newBuilder()
             .initialCapacity(10)
-            .concurrencyLevel(12)
+            .concurrencyLevel(8)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
 
@@ -88,7 +89,7 @@ public class TicketDetailCacheServiceRefactor {
     /**
      * get ticket from database
      */
-    public TicketDetailCache getTicketDetailDatabase(Long ticketId) {
+    public TicketDetailCache getTicketDetailDatabase1(Long ticketId) {
         RedisDistributedLocker locker = redisDistributedService.getDistributedLock(genEventItemKeyLock(ticketId));
         try {
             // 1 - Tao lock
@@ -103,10 +104,13 @@ public class TicketDetailCacheServiceRefactor {
             if (ticketDetailCache != null) {
                 return ticketDetailCache;
             }
-            Optional<TicketDetail> ticketDetail = ticketDetailRepository.findById(ticketId);
-            //TicketDetail ticketDetail = ticketDetailDomainService.getTicketDetailById(ticketId);
-            if (ticketDetail.isEmpty()) {
+           // TicketDetail ticketDetail = ticketDetailRepository.findById(ticketId);
+            TicketDetail ticketDetail = ticketDetailDomainService.getTicketDetailById(ticketId);
+            log.info("FROM DBS --> {}",  ticketDetail);
+
+            if (ticketDetail == null) {
                 return null;
+
             }
             ticketDetailCache = new TicketDetailCache().withClone(ticketDetail).withVersion(System.currentTimeMillis());
             // set data to distributed cache
@@ -117,6 +121,70 @@ public class TicketDetailCacheServiceRefactor {
         }finally {
             locker.unlock();
         }
+    }
+    public TicketDetailCache getTicketDetailDatabase(Long ticketId) {
+        RedisDistributedLocker locker = redisDistributedService.getDistributedLock(genEventItemKeyLock(ticketId));
+        int retryCount = 3; // Thử lại tối đa 3 lần
+
+        while (retryCount > 0) {
+            try {
+                // Cố gắng đợi lấy lock trong 1 giây, lease time 5 giây
+                boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
+
+                if (isLock) {
+                    try {
+                        // Double check: Khi lấy được lock, phải kiểm tra lại Redis một lần nữa
+                        // Tránh trường hợp thread trước đó vừa mới nạp cache xong và nhả lock ra.
+                        TicketDetailCache ticketDetailCache = redisInfrasService.getObject(genEventItemKey(ticketId), TicketDetailCache.class);
+                        log.info("Đọc   CACHE ở đầu khi Query DB ->  ở Thread: {} , {}",  Thread.currentThread().getName(), ticketDetailCache);
+                        if (ticketDetailCache == null) {
+                            Thread.sleep(50);
+                            ticketDetailCache = redisInfrasService.getObject(genEventItemKey(ticketId), TicketDetailCache.class);
+                        }
+                        if (ticketDetailCache != null) {
+                            return ticketDetailCache;
+                        }
+
+                        // Nếu Redis vẫn trống thật, tiến hành chọc DB
+                        TicketDetail ticketDetail = ticketDetailDomainService.getTicketDetailById(ticketId);
+                        log.info("FROM DBS {}", ticketDetail);
+
+                        if (ticketDetail == null) {
+                            return null;
+                        }
+
+                        ticketDetailCache = new TicketDetailCache().withClone(ticketDetail).withVersion(System.currentTimeMillis());
+                        redisInfrasService.setObject(genEventItemKey(ticketId), ticketDetailCache);
+                        log.info("Đã SET CACHE sau khi Query DB ->  ở Thread: {}",  Thread.currentThread().getName());
+                        ticketDetailCache = redisInfrasService.getObject(genEventItemKey(ticketId), TicketDetailCache.class);
+                        log.info("Đã ĐỌC CACHE sau khi SET CACHE  ->  ở Thread: {}, cache: {}",  Thread.currentThread().getName(),ticketDetailCache );
+
+                        return ticketDetailCache;
+                    } finally {
+                        locker.unlock(); // Đảm bảo luôn nhả lock khi xử lý xong
+                    }
+                }
+
+                // NẾU KHÔNG LẤY ĐƯỢC LOCK (tryLock trả về false)
+                retryCount--;
+                log.info("Lock acquisition failed, retrying... Remaining attempts: {}", retryCount);
+                Thread.sleep(100); // Ngủ 100ms chờ thread khác nạp cache xong rồi vòng lại check
+
+                // Sau khi ngủ dậy, thử đọc lại từ Redis luôn xem có chưa trước khi loop tiếp
+                TicketDetailCache cacheCheck = redisInfrasService.getObject(genEventItemKey(ticketId), TicketDetailCache.class);
+                if (cacheCheck != null) {
+                    return cacheCheck;
+                }
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Thread interrupted during lock acquisition", e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return null; // Trường hợp xui xẻo nhất sau 3 lần retry vẫn không có dữ liệu
     }
 
     /**

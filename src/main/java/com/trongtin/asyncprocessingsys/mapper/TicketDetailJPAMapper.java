@@ -1,14 +1,12 @@
-package com.xxxx.ddd.infrastructure.persistence.mapper;
+package com.trongtin.asyncprocessingsys.mapper;
 
-import com.xxxx.ddd.domain.model.entity.TicketDetail;
+import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TicketDetailJPAMapper extends JpaRepository<TicketDetail, Long> {
     /**

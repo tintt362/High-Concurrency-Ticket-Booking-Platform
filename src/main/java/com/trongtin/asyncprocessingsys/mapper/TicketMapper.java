@@ -1,8 +1,9 @@
 package com.trongtin.asyncprocessingsys.mapper;
 
-import com.xxxx.ddd.application.model.TicketDTO;
-import com.xxxx.ddd.application.model.command.CreateTicketCommand;
-import com.xxxx.ddd.domain.model.entity.Ticket;
+
+import com.trongtin.asyncprocessingsys.dto.response.TicketDTO;
+import com.trongtin.asyncprocessingsys.model.command.CreateTicketCommand;
+import com.trongtin.asyncprocessingsys.model.entity.Ticket;
 
 public class TicketMapper {
 

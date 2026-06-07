@@ -6,6 +6,7 @@ import com.trongtin.asyncprocessingsys.cache.distributed.RedisDistributedLocker;
 import com.trongtin.asyncprocessingsys.cache.distributed.RedisDistributedService;
 import com.trongtin.asyncprocessingsys.cache.redis.RedisInfrasService;
 import com.trongtin.asyncprocessingsys.model.entity.TicketDetail;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketDetailRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class TicketDetailCacheService {
     @Autowired // Khai bao cache
     private RedisInfrasService redisInfrasService;
     @Autowired
-    private TicketDetailDomainService ticketDetailDomainService; // thao tac voi DB
+    private TicketDetailRepository ticketDetailRepository; // thao tac voi DB
 
     // private static final Logger log = LoggerFactory.getLogger(TicketDetailCacheService.class);
     // use guava
@@ -44,7 +45,7 @@ public class TicketDetailCacheService {
         // 3. If NO --> Missing cache
 
         // 4. Get data from DBS
-        ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
+     //   ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
 //        log.info("FROM DBS {}, {}, {}", id, version, ticketDetail);
 
         // 5. check ticketitem
@@ -88,7 +89,7 @@ public class TicketDetailCacheService {
             }
             // 3 -> van khong co thi truy van DB
 
-            ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
+     //       ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
 //            log.info("FROM DBS ->>>> {}, {}", ticketDetail, version);
             if (ticketDetail == null) { // Neu trong dbs van khong co thi return ve not exists;
 //                log.info("TICKET NOT EXITS....{}", version);
@@ -161,7 +162,7 @@ public class TicketDetailCacheService {
             }
             // 3 -> van khong co thi truy van DB
 
-            ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
+      //      ticketDetail = ticketDetailDomainService.getTicketDetailById(id);
 //            log.info("FROM DBS ->>>> {}, {}", ticketDetail, version);
             if (ticketDetail == null) { // Neu trong dbs van khong co thi return ve not exists;
 //                log.info("TICKET NOT EXITS....{}", ticketDetail);

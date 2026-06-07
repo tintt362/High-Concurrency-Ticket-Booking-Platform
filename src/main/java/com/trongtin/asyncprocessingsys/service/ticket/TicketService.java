@@ -4,8 +4,10 @@ import com.trongtin.asyncprocessingsys.dto.response.TicketDTO;
 import com.trongtin.asyncprocessingsys.model.command.CreateTicketCommand;
 import com.trongtin.asyncprocessingsys.model.command.CreateTicketDetailCommand;
 import com.trongtin.asyncprocessingsys.model.command.UpdateTicketCommand;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 public interface TicketService {
 

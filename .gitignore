@@ -4,7 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 enviroment/data/
-
+benchmark
 ### STS ###
 .apt_generated
 .classpath

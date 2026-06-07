@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.model.enums;
+package com.trongtin.asyncprocessingsys.model.enums;
 
 /**
  * Trả về mã trạng thái

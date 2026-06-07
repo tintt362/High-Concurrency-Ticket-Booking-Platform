@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.dto;
+package com.trongtin.asyncprocessingsys.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;

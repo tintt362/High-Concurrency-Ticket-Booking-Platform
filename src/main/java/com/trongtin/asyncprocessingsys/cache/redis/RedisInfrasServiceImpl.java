@@ -54,45 +54,33 @@ public class RedisInfrasServiceImpl implements RedisInfrasService{
 //        Object result = redisTemplate.opsForValue().get(key);
 //        log.info("Set redis::{}", result != null && result.equals(value));
     }
-
     @Override
     public <T> T getObject(String key, Class<T> targetClass) {
         Object result = redisTemplate.opsForValue().get(key);
-//        log.info("get Cache::{}", result);
+
         if (result == null) {
             return null;
         }
-//        try {
-//            log.info("get Cache::1{}", JSON.parseObject((String) result, targetClass));
-//            return JSON.parseObject((String) result, targetClass);
-//        } catch (Exception e) {
-//            log.error("error Cache::{}", e);
-//            return null;
-//        }
-        // Nếu kết quả là một LinkedHashMap
+
+        // Nếu Spring Redis đã tự động phục hồi đúng kiểu Object mong muốn
+        if (targetClass.isInstance(result)) {
+            return targetClass.cast(result);
+        }
+
+        // Trường hợp dự phòng: Nếu cấu hình Redis thay đổi dẫn đến trả về LinkedHashMap
         if (result instanceof Map) {
             try {
-                // Chuyển đổi LinkedHashMap thành đối tượng mục tiêu
+                // Tái sử dụng ObjectMapper được cấu hình chuẩn (hoặc tự inject ObjectMapper của Spring vào)
                 ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.convertValue(result, targetClass);
+// Sửa lại dòng code số 75 trong ảnh thành:
+                objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());                return objectMapper.convertValue(result, targetClass);
             } catch (IllegalArgumentException e) {
-//                log.error("Error converting LinkedHashMap to object: {}", e.getMessage());
+                log.error("Lỗi convert LinkedHashMap sang Object: {}", e.getMessage());
                 return null;
             }
         }
 
-        // Nếu result là String, thực hiện chuyển đổi bình thường
-        if (result instanceof String) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.readValue((String) result, targetClass);
-            } catch (JsonProcessingException e) {
-//                log.error("Error deserializing JSON to object: {}", e.getMessage());
-                return null;
-            }
-        }
-
-        return null; // hoặc ném ra một ngoại lệ tùy ý
+        return null;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.trongtin.asyncprocessingsys.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +26,19 @@ public class RedisConfig {
     }
 
     @Bean
+    @SuppressWarnings(value = { "unchecked", "rawtypes" })
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory)
     {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
-        Jackson2JsonRedisSerializer serializer = new Jackson2JsonRedisSerializer(Object.class);
+
+        // Cấu hình ObjectMapper hỗ trợ Java 8 date/time (LocalDateTime, etc.)
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        Jackson2JsonRedisSerializer<Object> serializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
 
         // Sử dụng StringRedisSerializer để tuần tự hóa và giải tuần tự hóa các giá trị khóa redis
         redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -41,27 +52,6 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    // ── StreamMessageListenerContainer ─────────────────────────
-    // Đây là "engine" lắng nghe stream liên tục
-    // Giống như một thread chạy ngầm, cứ có message mới là xử lý
-    @Bean
-    public StreamMessageListenerContainer<String, MapRecord<String, String, String>>
-    streamListenerContainer(RedisConnectionFactory factory) {
-                var options =
-                StreamMessageListenerContainer
-                        .StreamMessageListenerContainerOptions
-                        .builder()
-                        .pollTimeout(Duration.ofSeconds(1))
-                        // Chờ tối đa 2s nếu stream rỗng (blocking read)
-                        // Hiệu quả hơn poll mỗi 2s vì không loop liên tục
-                        .build();
 
-        StreamMessageListenerContainer<String, MapRecord<String, String, String>>
-                container = StreamMessageListenerContainer.create(factory, options);
 
-        container.start();
-        // Bắt đầu lắng nghe — subscription sẽ được thêm vào bởi StreamConfig
-        log.info("[RedisConfig] StreamListenerContainer started");
-        return container;
-    }
 }

@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.dto;
+package com.trongtin.asyncprocessingsys.dto.request;
 
 import jakarta.validation.Valid;
 import lombok.Data;

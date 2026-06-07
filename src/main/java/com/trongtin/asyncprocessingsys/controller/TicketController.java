@@ -1,17 +1,15 @@
-package com.xxxx.ddd.controller.http;
+package com.trongtin.asyncprocessingsys.controller;
 
-import com.xxxx.ddd.application.model.TicketDTO;
-import com.xxxx.ddd.application.model.command.CreateTicketCommand;
-import com.xxxx.ddd.application.model.command.CreateTicketDetailCommand;
-import com.xxxx.ddd.application.service.ticket.TicketAppService;
-import com.xxxx.ddd.controller.dto.CreateTicketDetailRequest;
-import com.xxxx.ddd.controller.dto.CreateTicketFullRequest;
-import com.xxxx.ddd.controller.dto.CreateTicketRequest;
-import com.xxxx.ddd.controller.dto.UpdateTicketRequest;
-import com.xxxx.ddd.controller.mapper.TicketControllerMapper;
-import com.xxxx.ddd.controller.model.enums.ResultCode;
-import com.xxxx.ddd.controller.model.enums.ResultUtil;
-import com.xxxx.ddd.controller.model.vo.ResultMessage;
+
+import com.trongtin.asyncprocessingsys.dto.request.CreateTicketFullRequest;
+import com.trongtin.asyncprocessingsys.dto.request.UpdateTicketRequest;
+import com.trongtin.asyncprocessingsys.dto.response.TicketDTO;
+import com.trongtin.asyncprocessingsys.mapper.TicketControllerMapper;
+import com.trongtin.asyncprocessingsys.model.command.CreateTicketCommand;
+import com.trongtin.asyncprocessingsys.model.command.CreateTicketDetailCommand;
+import com.trongtin.asyncprocessingsys.model.enums.ResultUtil;
+import com.trongtin.asyncprocessingsys.model.vo.ResultMessage;
+import com.trongtin.asyncprocessingsys.service.ticket.TicketService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,7 @@ public class TicketController {
 
 
     @Autowired
-    private TicketAppService ticketAppService;
+    private TicketService ticketService;
 
     /**
      * Lấy tất cả ticket đang active
@@ -39,7 +37,7 @@ public class TicketController {
     public ResultMessage<List<TicketDTO>> getAllActiveTickets() {
         log.info("Fetching all active tickets");
         try {
-            List<TicketDTO> tickets = ticketAppService.getAllActiveTickets();
+            List<TicketDTO> tickets = ticketService.getAllActiveTickets();
             return ResultUtil.data(tickets);
         } catch (Exception e) {
             log.error("Error fetching active tickets", e);
@@ -85,7 +83,7 @@ public class TicketController {
 
             // ✅ gọi service bằng command
             TicketDTO ticketDTO =
-                    ticketAppService.createTicket(ticketCmd, detailCmd);
+                    ticketService.createTicket(ticketCmd, detailCmd);
 
             return ResultUtil.data(ticketDTO);
         } catch (IllegalArgumentException e) {
@@ -110,7 +108,7 @@ public class TicketController {
             @PathVariable Long ticketId) {
         log.info("Fetching ticket: {}", ticketId);
         try {
-            TicketDTO ticketDTO = ticketAppService.getTicketById(ticketId);
+            TicketDTO ticketDTO = ticketService.getTicketById(ticketId);
             return ResultUtil.data(ticketDTO);
         } catch (Exception e) {
             log.error("Error fetching ticket", e);
@@ -157,7 +155,7 @@ public class TicketController {
             @PathVariable Long ticketId) {
         log.info("Activating ticket: {}", ticketId);
         try {
-            TicketDTO ticketDTO = ticketAppService.activeTicket(ticketId);
+            TicketDTO ticketDTO = ticketService.activeTicket(ticketId);
             return ResultUtil.data(ticketDTO);
         } catch (Exception e) {
             log.error("Error activating ticket", e);
@@ -178,7 +176,7 @@ public class TicketController {
             @PathVariable Long ticketId) {
         log.info("Inactivating ticket: {}", ticketId);
         try {
-            TicketDTO ticketDTO = ticketAppService.inactiveTicket(ticketId);
+            TicketDTO ticketDTO = ticketService.inactiveTicket(ticketId);
             return ResultUtil.data(ticketDTO);
         } catch (Exception e) {
             log.error("Error inactivating ticket", e);
@@ -199,7 +197,7 @@ public class TicketController {
             @PathVariable Long ticketId) {
         log.info("Deleting ticket: {}", ticketId);
         try {
-            ticketAppService.deleteTicket(ticketId);
+            ticketService.deleteTicket(ticketId);
             return ResultUtil.data("Ticket deleted successfully");
         } catch (Exception e) {
             log.error("Error deleting ticket", e);

@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.dto;
+package com.trongtin.asyncprocessingsys.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 public class CreateTicketRequest {

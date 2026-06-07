@@ -1,4 +1,4 @@
-package com.xxxx.ddd.controller.model.vo;
+package com.trongtin.asyncprocessingsys.model.vo;
 
 import lombok.Data;
 

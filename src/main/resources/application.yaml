@@ -1,21 +1,45 @@
+server:
+  port: 1122
+  tomcat:
+    accept-count: 2000
+    max-connections: 10000
+
+
 spring:
+  #  main:
+  #    lazy-initialization: true
+  # application
+  application:
+    name: xxxx.com
+  #DBS
   datasource:
-    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/asyncjobdb}
-    username: ${DATASOURCE_USERNAME:root}
-    password: ${DATASOURCE_PASSWORD:admin123}
+    hikari:
+      maximum-pool-size: 80
+      minimum-idle: 20
+      connection-timeout: 3000
+      validation-timeout: 1000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 5000
+    url: jdbc:mysql://localhost:3316/vetautet
+    username: root
+    password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
 
   jpa:
-    hibernate:
-      ddl-auto: update
+    database: mysql
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    jackson:
-      serialization:
-        indent-output: true
+    hibernate:
+      ddl-auto: none  # Không tự động tạo/ cập nhật bảng thay vì update
+  #    properties:
+  #      hibernate:
+  #        format_sql: true
+  #        use_sql_comments: true
+  jackson:
+    serialization:
+      indent-output: true
+  # Redis server connection settings
   data:
     redis:
       host: 127.0.0.1 # Host of the Redis server
@@ -28,87 +52,24 @@ spring:
           min-idle: 5 # Minimum number of idle connections in the pool
       #          max-wait: -1ms # Maximum wait time to get a connection from the pool (uses -1 for no limit)
       connect-timeout: 30000 # Connection timeout (in milliseconds)
-
-  mail:
-    host: sandbox.smtp.mailtrap.io
-    port: 2525
-    username: ${MAIL_USERNAME:ee68c3357c9725}
-    password: ${MAIL_PASSWORD:fb2e83f24305a1}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-    time-zone: Asia/Ho_Chi_Minh
-
-server:
-  port: 8080
-
-app:
-  storage:
-    pdf-dir: uploads/pdf
-    base-url: ${STORAGE_BASE_URL:http://localhost:8080/files}
-
-  email:
-    from: "Async Job System <noreply@asyncjob.com>"
+  #    redis:
+  #      sentinel:
+  #        master: mymaster  # Đặt đúng tên master theo Sentinel config
+  #        nodes:
+  #          - localhost:26379
+  #          - localhost:26380
+  #          - localhost:26381
+  #      password: 123456
+  threads:
+    virtual:
+      enabled: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics
-  endpoint:
-    health:
-      show-details: always
-    prometheus:
-      enabled: true
-  metrics:
-    tags:
-      application: async-job-system
-
-logging:
-  level:
-    com.trongtin: DEBUG
-  file:
-    name: /app/logs/spring-boot.log
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# ── Cấu hình Ollama AI ──────────────────────────────
-ollama:
-  base-url:  ${OLLAMA_BASE_URL:http://localhost:11434}
-  model: gemma3:4b
-  enabled: true
-  timeout-seconds: 120
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      ollamaService:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        permittedNumberOfCallsInHalfOpenState: 3
-        #        slidingWindowType: TIME_BASED
-        minimumNumberOfCalls: 5
-        waitDurationInOpenState: 5s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
-
-  ratelimiter:
-    instances:
-      createJob:
-        limitForPeriod: 2
-        limitRefreshPeriod: 10s
-        timeoutDuration: 0
-        registerHealthIndicator: true
-        eventConsumerBufferSize: 100
-      backendB:
-        limitForPeriod: 5
-        limitRefreshPeriod: 10s
-        timeoutDuration: 3s
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
