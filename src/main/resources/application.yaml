@@ -1,79 +1,75 @@
+server:
+  port: 1122
+  tomcat:
+    accept-count: 2000
+    max-connections: 10000
+
+
 spring:
+  #  main:
+  #    lazy-initialization: true
+  # application
+  application:
+    name: xxxx.com
+  #DBS
   datasource:
-    url: jdbc:mysql://localhost:3306/asyncjobdb
-    username: admin
-    password: admin123
+    hikari:
+      maximum-pool-size: 80
+      minimum-idle: 20
+      connection-timeout: 3000
+      validation-timeout: 1000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 5000
+    url: jdbc:mysql://localhost:3316/vetautet
+    username: root
+    password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
 
   jpa:
-    hibernate:
-      ddl-auto: none
+    database: mysql
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 2000ms
-
-  # ── Mailtrap: inbox test email, đăng ký free tại mailtrap.io ──
-  mail:
-    host: sandbox.smtp.mailtrap.io
-    port: 2525
-    username: ee68c3357c9725   # ← thay bằng username từ Mailtrap
-    password: fb2e83f24305a1   # ← thay bằng password từ Mailtrap
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
+    hibernate:
+      ddl-auto: none  # Không tự động tạo/ cập nhật bảng thay vì update
+  #    properties:
+  #      hibernate:
+  #        format_sql: true
+  #        use_sql_comments: true
   jackson:
     serialization:
-      write-dates-as-timestamps: false
-    time-zone: Asia/Ho_Chi_Minh
+      indent-output: true
+  # Redis server connection settings
+  data:
+    redis:
+      host: 127.0.0.1 # Host of the Redis server
+      port: 6319 # Port of the Redis server for connection
+      password: ""  # Password for connecting to the Redis server (default is empty)
+      lettuce:
+        pool: # Connection pool settings
+          max-active: 10 # Maximum number of active connections in the pool (uses -1 for no limit)
+          max-idle: 5 # Maximum number of idle connections in the pool
+          min-idle: 5 # Minimum number of idle connections in the pool
+      #          max-wait: -1ms # Maximum wait time to get a connection from the pool (uses -1 for no limit)
+      connect-timeout: 30000 # Connection timeout (in milliseconds)
+  #    redis:
+  #      sentinel:
+  #        master: mymaster  # Đặt đúng tên master theo Sentinel config
+  #        nodes:
+  #          - localhost:26379
+  #          - localhost:26380
+  #          - localhost:26381
+  #      password: 123456
+  threads:
+    virtual:
+      enabled: true
 
-server:
-  port: 8080
-
-# Cấu hình thư mục lưu file PDF
-app:
-  storage:
-    pdf-dir: uploads/pdf
-    base-url: http://localhost:8080/files
-
-  email:
-    from: "Async Job System <noreply@asyncjob.com>"
-
-
-
-
-# Actuator — expose endpoint /actuator/prometheus
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics
-  endpoint:
-    health:
-      show-details: always
-    prometheus:
-      enabled: true
-  metrics:
-    tags:
-      application: async-job-system   # tag này xuất hiện trong mọi metric
-
-logging:
-  level:
-    com.trongtin: DEBUG
-  file:
-    # Dùng đường dẫn tuyệt đối khớp với thư mục đã tạo trong Dockerfile
-    name: /app/logs/spring-boot.log
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
