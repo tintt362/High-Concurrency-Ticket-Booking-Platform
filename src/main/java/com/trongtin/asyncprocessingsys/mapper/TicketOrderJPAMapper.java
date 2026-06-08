@@ -35,12 +35,7 @@ public interface TicketOrderJPAMapper extends JpaRepository<TicketDetail, Long> 
             "WHERE t.id = :ticketId AND t.stockAvailable >= :quantity")
     int decreaseStockLevel1(@Param("ticketId") Long ticketId, @Param("quantity") int quantity);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE TicketDetail t SET t.updatedAt = CURRENT_TIMESTAMP, " +
-            "t.stockAvailable = t.stockAvailable - :quantity " +
-            "WHERE t.id = :ticketId")
-    int decreaseStockLevel0(@Param("ticketId") Long ticketId, @Param("quantity") int quantity);
+
 
     @Modifying
     @Transactional
