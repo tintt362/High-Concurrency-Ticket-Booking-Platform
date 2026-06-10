@@ -1,9 +1,5 @@
 server:
   port: 1122
-  tomcat:
-    accept-count: 2000
-    max-connections: 10000
-
 
 spring:
   #  main:
