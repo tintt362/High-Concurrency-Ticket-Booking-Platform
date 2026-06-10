@@ -1,17 +1,17 @@
 package com.trongtin.asyncprocessingsys.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
-import org.springframework.data.redis.stream.Subscription;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -26,40 +26,32 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, String> redisTemplate(
-            RedisConnectionFactory factory) {
-        RedisTemplate<String, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        StringRedisSerializer s = new StringRedisSerializer();
-        template.setKeySerializer(s);
-        template.setValueSerializer(s);
-        template.setHashKeySerializer(s);
-        template.setHashValueSerializer(s);
-        template.afterPropertiesSet();
-        return template;
+    @SuppressWarnings(value = { "unchecked", "rawtypes" })
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory)
+    {
+        RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+
+        // Cấu hình ObjectMapper hỗ trợ Java 8 date/time (LocalDateTime, etc.)
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        Jackson2JsonRedisSerializer<Object> serializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
+
+        // Sử dụng StringRedisSerializer để tuần tự hóa và giải tuần tự hóa các giá trị khóa redis
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(serializer);
+
+        // Khóa Hash cũng sử dụng phương thức tuần tự hóa StringRedisSerializer.
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(serializer);
+
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
     }
 
-    // ── StreamMessageListenerContainer ─────────────────────────
-    // Đây là "engine" lắng nghe stream liên tục
-    // Giống như một thread chạy ngầm, cứ có message mới là xử lý
-    @Bean
-    public StreamMessageListenerContainer<String, MapRecord<String, String, String>>
-    streamListenerContainer(RedisConnectionFactory factory) {
-                var options =
-                StreamMessageListenerContainer
-                        .StreamMessageListenerContainerOptions
-                        .builder()
-                        .pollTimeout(Duration.ofSeconds(1))
-                        // Chờ tối đa 2s nếu stream rỗng (blocking read)
-                        // Hiệu quả hơn poll mỗi 2s vì không loop liên tục
-                        .build();
 
-        StreamMessageListenerContainer<String, MapRecord<String, String, String>>
-                container = StreamMessageListenerContainer.create(factory, options);
 
-        container.start();
-        // Bắt đầu lắng nghe — subscription sẽ được thêm vào bởi StreamConfig
-        log.info("[RedisConfig] StreamListenerContainer started");
-        return container;
-    }
 }
