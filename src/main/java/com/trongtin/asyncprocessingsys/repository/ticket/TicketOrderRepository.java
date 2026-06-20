@@ -1,9 +1,4 @@
-package com.trongtin.asyncprocessingsys.repository.order;
-
-import com.trongtin.asyncprocessingsys.dto.response.TicketOrderDTO;
-import com.trongtin.asyncprocessingsys.model.entity.TickerOrder;
-
-import java.util.List;
+package com.trongtin.asyncprocessingsys.repository.ticket;
 
 public interface TicketOrderRepository {
     boolean decreaseStockLevel1(Long tickerId, int quantity);

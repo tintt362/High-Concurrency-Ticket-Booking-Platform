@@ -1,8 +1,8 @@
-package com.trongtin.asyncprocessingsys.repository.order.impl;
+package com.trongtin.asyncprocessingsys.repository.ticket.impl;
 
 
 import com.trongtin.asyncprocessingsys.mapper.TicketOrderJPAMapper;
-import com.trongtin.asyncprocessingsys.repository.order.TicketOrderRepository;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketOrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -48,14 +48,7 @@ spring:
           min-idle: 5 # Minimum number of idle connections in the pool
       #          max-wait: -1ms # Maximum wait time to get a connection from the pool (uses -1 for no limit)
       connect-timeout: 30000 # Connection timeout (in milliseconds)
-  #    redis:
-  #      sentinel:
-  #        master: mymaster  # Đặt đúng tên master theo Sentinel config
-  #        nodes:
-  #          - localhost:26379
-  #          - localhost:26380
-  #          - localhost:26381
-  #      password: 123456
+
   threads:
     virtual:
       enabled: true
