@@ -1,12 +1,4 @@
 /*!
- * JavaScript Cookie v2.2.1
- * https://github.com/js-cookie/js-cookie
- *
- * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
- * Released under the MIT license
- */
-
-/*!
 * screenfull
 * v5.2.0 - 2021-11-03
 * (c) Sindre Sorhus; MIT License
@@ -16,6 +8,8 @@
 * tabbable 6.4.0
 * @license MIT, https://github.com/focus-trap/tabbable/blob/master/LICENSE
 */
+
+/*! js-cookie v3.0.7 | MIT */
 
 /**
  * @remix-run/router v1.23.2

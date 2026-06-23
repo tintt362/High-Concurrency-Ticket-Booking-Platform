@@ -37,8 +37,8 @@
                 "path": "img/errors-root-cause.png"
             }
         ],
-        "version": "2.0.3",
-        "updated": "2026-04-30",
+        "version": "2.0.4",
+        "updated": "2026-06-10",
         "links": [
             {
                 "name": "Github",
@@ -67,7 +67,9 @@
             "exposedComponents": [
                 "grafana-asserts-app/entity-assertions-widget/v1",
                 "grafana-adaptivetraces-app/span-latency/v1",
-                "grafana/query-library-context/v1"
+                "grafana/query-library-context/v1",
+                "grafana/add-to-dashboard-form/v1",
+                "grafana/alerting/create-alert-from-panel/v1"
             ]
         }
     },

@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface TicketOrderService {
 
-    boolean decreaseStockLevel1(Long tickerId, int quantity);
-    boolean decreaseStockLevel3CAS(Long tickerId, int quantity);
+    boolean decreaseStock1(Long tickerId, int quantity);
+    boolean decreaseStockCAS(Long tickerId, int quantity);
     PlaceOrderResponse placeOrderCAS(Long ticketId, int quantity);
 
    // boolean decreaseStockQueue(Long userId, Long tickerId, int quantity);

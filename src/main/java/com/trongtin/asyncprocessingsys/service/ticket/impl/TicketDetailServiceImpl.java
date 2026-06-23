@@ -5,7 +5,6 @@ import com.trongtin.asyncprocessingsys.dto.response.TicketDetailDTO;
 import com.trongtin.asyncprocessingsys.mapper.TicketDetailMapper;
 import com.trongtin.asyncprocessingsys.model.TicketDetailCache;
 import com.trongtin.asyncprocessingsys.service.ticket.TicketDetailService;
-import com.trongtin.asyncprocessingsys.service.ticket.cache_ticket.TicketDetailCacheService;
 import com.trongtin.asyncprocessingsys.service.ticket.cache_ticket.TicketDetailCacheServiceRefactor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TicketDetailServiceImpl implements TicketDetailService {
 
-
     // CALL CACHE
-    @Autowired
-    private TicketDetailCacheService ticketDetailCacheService;
 
     @Autowired
     private TicketDetailCacheServiceRefactor ticketDetailCacheServiceRefactor;

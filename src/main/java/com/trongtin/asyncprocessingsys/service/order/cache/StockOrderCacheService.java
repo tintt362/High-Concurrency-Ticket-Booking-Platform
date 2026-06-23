@@ -92,7 +92,7 @@ public class StockOrderCacheService {
         return original != null ? original.longValue() : -1L;
     }
 
-    // tăng stock trong cache nếu user cancel đơn hàng trong khi diễn ra flash sale
+    // tăng stock trong cache nếu user cancel đơn hàng
     public boolean increaseStockCache(Long ticketId, Integer quantity) {
         String keyStock = getKeyStockItemCache(ticketId);
         String luaScript =

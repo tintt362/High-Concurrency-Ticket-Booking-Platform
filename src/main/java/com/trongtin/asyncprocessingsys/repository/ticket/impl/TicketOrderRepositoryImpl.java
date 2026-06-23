@@ -15,18 +15,18 @@ public class TicketOrderRepositoryImpl implements TicketOrderRepository {
     private TicketOrderJPAMapper ticketOrderJPAMapper;
 
     @Override
-    public boolean decreaseStockLevel1(Long tickerId, int quantity) {
+    public boolean decreaseStock1(Long tickerId, int quantity) {
         log.info("Run test:decreaseStockLevel1 with: | {}, {} ", tickerId, quantity);
-        return ticketOrderJPAMapper.decreaseStockLevel1(tickerId, quantity) > 0;
+        return ticketOrderJPAMapper.decreaseStock1(tickerId, quantity) > 0;
     }
 
 
 
 
     @Override
-    public boolean decreaseStockLevel3CAS(Long tickerId, int oldStockAvailable, int quantity) {
+    public boolean decreaseStockCAS(Long tickerId, int oldStockAvailable, int quantity) {
         log.info("Run test:decreaseStockLevel3CAS with: | {}, {}, {} ", tickerId, oldStockAvailable, quantity);
-        return ticketOrderJPAMapper.decreaseStockLevel3CAS(tickerId, oldStockAvailable, quantity) > 0;
+        return ticketOrderJPAMapper.decreaseStockCAS(tickerId, oldStockAvailable, quantity) > 0;
     }
 
     @Override

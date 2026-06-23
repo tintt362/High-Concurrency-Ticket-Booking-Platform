@@ -1,8 +1,8 @@
 package com.trongtin.asyncprocessingsys.repository.ticket;
 
 public interface TicketOrderRepository {
-    boolean decreaseStockLevel1(Long tickerId, int quantity);
-    boolean decreaseStockLevel3CAS(Long tickerId, int oldStockAvailable, int quantity);
+    boolean decreaseStock1(Long tickerId, int quantity);
+    boolean decreaseStockCAS(Long tickerId, int oldStockAvailable, int quantity);
 
     int getStockAvailable(Long ticketId);
 

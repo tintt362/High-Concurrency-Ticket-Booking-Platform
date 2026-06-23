@@ -32,7 +32,7 @@ public class TicketOrderController {
             @PathVariable("quantity") int quantity
     ) {
         log.info("Controller:->orderTicketByLevel | {}, {}", ticketId, quantity);
-        return ticketOrderAppService.decreaseStockLevel1(ticketId, quantity);
+        return ticketOrderAppService.decreaseStock1(ticketId, quantity);
     }
 
     /**
@@ -45,7 +45,7 @@ public class TicketOrderController {
             @PathVariable("quantity") int quantity
     ) {
         log.info("Controller:->orderTicketByLevel3 | {}, {}", ticketId, quantity);
-        return ticketOrderAppService.decreaseStockLevel3CAS(ticketId, quantity);
+        return ticketOrderAppService.decreaseStockCAS(ticketId, quantity);
     }
 
     @PostMapping("/cas")
@@ -63,7 +63,7 @@ public class TicketOrderController {
 
 
 
-    // V1 — load toàn bộ đơn hàng (không phân trang, dùng để so sánh)
+    // V1 — load toàn bộ đơn hàng
     @GetMapping("/{userId}/list")
     public ResultMessage<List<TicketOrderDTO>> getListOrderByUser(
             @PathVariable("userId") Long userId,
@@ -73,7 +73,7 @@ public class TicketOrderController {
         return ResultUtil.data(ticketOrderAppService.findAll(ntable));
     }
 
-    // V2 — cursor-based pagination (50 đơn/trang, O(1) dù có 10M rows)
+    // V2 — cursor-based pagination
     @GetMapping("/{userId}/list/page")
     public ResultMessage<PagedOrdersDTO> getListOrderByUserPaged(
             @PathVariable("userId") Long userId,

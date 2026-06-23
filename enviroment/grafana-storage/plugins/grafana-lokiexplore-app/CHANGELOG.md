@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.1.3
+
+##### Chores
+
+* **ci:**
+  *  update version-pr trigger (#1949) (23d225ef)
+  *  update bundle-types node version (#1950) (e759c4e0)
+* **deps:**  update to 13.0.2, remove unused, pin (#1941) (3c18411d)
+
+##### New Features
+
+* **logs:**  new options for service selection (show context, go to log line, show similar log lines, add line filter) and updated permalinks (#1940) (158acbf0)
+
+##### Bug Fixes
+
+* **security/high/:**  update security protobufjs to v8.6.0 [security] (#1956) (6a229187)
+* **ServiceSelection:**  fix broken context queries in due to trailing commas (#1953) (34b809e7)
+
+
+## 2.1.2
+
+##### Chores
+
+* **version-pr:**  try creating a pr for version-bump-changelog (#1942) (2b21a5d1)
+* **release-please:**  update trigger to autogenerate git tags (#1939) (6f233d77)
+
+
+## 2.1.1
+
+##### Bug Fixes
+
+* **ServiceSelectionTabsScene:**  rename add tab action (#1937) (732e748c)
+
+
 ## [2.1.0](https://github.com/grafana/logs-drilldown/compare/v2.0.4...v2.1.0) (2026-06-09)
 
 
