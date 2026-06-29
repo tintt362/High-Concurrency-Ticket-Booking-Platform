@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.1.5](https://github.com/grafana/logs-drilldown/compare/v2.1.4...v2.1.5) (2026-06-24)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump dompurify override to 3.4.11 for CVE remediation ([#1970](https://github.com/grafana/logs-drilldown/issues/1970)) ([b607808](https://github.com/grafana/logs-drilldown/commit/b60780830c857198f55650efa3b7a7c67e3630ce))
+
+## [2.1.4](https://github.com/grafana/logs-drilldown/compare/v2.1.3...v2.1.4) (2026-06-22)
+
+
+### 🐛 Bug Fixes
+
+* **generateLinkFromFilters:** fix potentially duplicated filters ([#1969](https://github.com/grafana/logs-drilldown/issues/1969)) ([e2bb984](https://github.com/grafana/logs-drilldown/commit/e2bb98424477ecda91c2f2b7006d7383c7f9760e))
+* **Layout:** improve layout resizing ([#1966](https://github.com/grafana/logs-drilldown/issues/1966)) ([c63373a](https://github.com/grafana/logs-drilldown/commit/c63373aebbfcd4016f7f95cb6526ec67fe0dbfc5))
+
 ## 2.1.3
 
 ##### Chores

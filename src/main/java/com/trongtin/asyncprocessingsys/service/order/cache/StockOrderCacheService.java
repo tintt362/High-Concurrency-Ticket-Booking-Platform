@@ -3,6 +3,7 @@ package com.trongtin.asyncprocessingsys.service.order.cache;
 
 import com.trongtin.asyncprocessingsys.cache.redis.RedisInfrasService;
 import com.trongtin.asyncprocessingsys.model.TicketDetailCache;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketOrderRepository;
 import com.trongtin.asyncprocessingsys.service.ticket.cache_ticket.TicketDetailCacheServiceRefactor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,21 +23,28 @@ public class StockOrderCacheService {
     @Autowired
     private RedisInfrasService redisInfrasService;
 
+    @Autowired
+    private TicketOrderRepository ticketOrderRepository;
+
     public boolean addStockAvailableToCache(Long ticketId) {
         // That's remember check validation(*)
         if(ticketId == null) {
             return false;
         }
-        // get stock_available from mysql
-        TicketDetailCache ticketDetailCache = ticketDetailCacheServiceRefactor.getTicketDetail(ticketId, null);
-        if(ticketDetailCache == null || ticketDetailCache.getTicketDetail() == null) {
-            return false;
-        }
+//        // get stock_available from mysql
+//      //  TicketDetailCache ticketDetailCache = ticketDetailCacheServiceRefactor.getTicketDetail(ticketId, null);
+//        if(ticketDetailCache == null || ticketDetailCache.getTicketDetail() == null) {
+//            return false;
+//        }
+        int stockFromDB = ticketOrderRepository.getStockAvailable(ticketId);
         String keyStockItemCache = getKeyStockItemCache(ticketId);
-        log.info("get->getKeyStockItemCache() | {}, {}, {}", ticketId, keyStockItemCache,
-                ticketDetailCache.getTicketDetail().getStockAvailable());
+//        log.info("get->getKeyStockItemCache() | {}, {}, {}", ticketId, keyStockItemCache,
+//                ticketDetailCache.getTicketDetail().getStockAvailable());
+
+        log.info("get->getKeyStockFromDB() | {}, {}, {}", ticketId, keyStockItemCache,
+                stockFromDB);
         // stockAvailable = ticketDetailCache.getTicketDetail().getStockAvailable();
-        redisInfrasService.setInt(keyStockItemCache, ticketDetailCache.getTicketDetail().getStockAvailable());
+        redisInfrasService.setInt(keyStockItemCache, stockFromDB);
         return true;
     }
 

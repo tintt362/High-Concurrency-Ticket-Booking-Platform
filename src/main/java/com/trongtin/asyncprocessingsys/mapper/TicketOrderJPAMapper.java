@@ -28,6 +28,8 @@ public interface TicketOrderJPAMapper extends JpaRepository<TicketDetail, Long> 
      * @param quantity The quantity to decrease.
      * @return The number of rows affected (should be 0 or 1).
      */
+
+    // khong dam bao tim idempotent mysql ( double click bi tru 2 lan)
     @Modifying
     @Transactional
     @Query("UPDATE TicketDetail t SET t.updatedAt = CURRENT_TIMESTAMP, " +
@@ -37,6 +39,7 @@ public interface TicketOrderJPAMapper extends JpaRepository<TicketDetail, Long> 
 
 
 
+    //CAS: Chỉ cập nhật dữ liệu nếu giá trị hiện tại vẫn giống như giá trị mình đã đọc trước đó.
     @Modifying
     @Transactional
     @Query("UPDATE TicketDetail t SET t.updatedAt = CURRENT_TIMESTAMP, " +
