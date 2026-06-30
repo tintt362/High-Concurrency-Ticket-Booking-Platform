@@ -12,21 +12,39 @@ spring:
     hikari:
       maximum-pool-size: 80
       minimum-idle: 20
-      connection-timeout: 3000
+      connection-timeout: 3000 # request doi 3s de lay connection
       validation-timeout: 1000
       idle-timeout: 600000
       max-lifetime: 1800000
-      leak-detection-threshold: 5000
+      leak-detection-threshold: 2000 # xem connection nao dang giu qua lau
+
     url: jdbc:mysql://localhost:3316/vetautet
     username: root
     password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
 
+decorator:
+  datasource:
+    datasource-proxy:
+      logging: slf4j
+      multiline: true
+      query:
+        enable-logging: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.stat: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.springframework.transaction: TRACE
   jpa:
     database: mysql
     show-sql: true
     hibernate:
+      generate_statistics: true
+
       ddl-auto: none  # Không tự động tạo/ cập nhật bảng thay vì update
   #    properties:
   #      hibernate:
