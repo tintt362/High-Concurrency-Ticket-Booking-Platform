@@ -1,5 +1,5 @@
 server:
-  port: 1122
+  port: 11222
 
 spring:
   #  main:
