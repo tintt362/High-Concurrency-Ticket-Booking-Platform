@@ -73,7 +73,7 @@ public class StockOrderCacheService {
         }
         return 0; // stockAvailable = 0 , quantity = 1
     }
-    public int decreaseStockCacheByLUA(Long ticketId, Integer quantity) {
+    public int decreaseStockCacheByLUAOld(Long ticketId, Integer quantity) {
         String keyStockLUA = getKeyStockItemCache(ticketId);
         long startTime = System.nanoTime();
 
@@ -90,7 +90,7 @@ public class StockOrderCacheService {
         System.out.println("Thời gian thực hiện luaScript tối ưu: " + durationMillis + " ms");
         return result != null ? result.intValue() : -1;
     }
-    public int decreaseStockCacheByLUAOld(Long ticketId, Integer quantity) {
+    public int decreaseStockCacheByLUA(Long ticketId, Integer quantity) {
         String keyStockLUA = getKeyStockItemCache(ticketId);
         // return -1 when key doesn't exist (cache not warmed), 0 when out of stock, 1 when success
         long startTime = System.nanoTime();

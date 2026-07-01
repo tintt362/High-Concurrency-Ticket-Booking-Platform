@@ -62,3 +62,10 @@ management:
     metrics:
       export:
         enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.stat: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.springframework.transaction: TRACE
