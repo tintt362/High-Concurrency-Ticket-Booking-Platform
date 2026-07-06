@@ -25,6 +25,6 @@ public class WarmupDataBeforeEvent {
         // get list events
         // for
         log.info("Load ticket item Once... warmup..| {}", System.currentTimeMillis());
-        stockOrderCacheService.addStockAvailableToCache(1L);
+        stockOrderCacheService.addStockAvailableToCache(4L);
     }
 }

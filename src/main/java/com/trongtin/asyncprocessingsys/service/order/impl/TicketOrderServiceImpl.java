@@ -8,6 +8,7 @@ import com.trongtin.asyncprocessingsys.dto.response.TicketOrderDTO;
 import com.trongtin.asyncprocessingsys.model.entity.TickerOrder;
 import com.trongtin.asyncprocessingsys.repository.ticket.TicketOrderRepository;
 import com.trongtin.asyncprocessingsys.service.order.OrderDeductionService;
+import com.trongtin.asyncprocessingsys.service.order.StockTransactionService;
 import com.trongtin.asyncprocessingsys.service.order.TicketOrderService;
 import com.trongtin.asyncprocessingsys.service.order.cache.StockOrderCacheService;
 import jakarta.persistence.LockTimeoutException;
@@ -43,6 +44,8 @@ public class TicketOrderServiceImpl implements TicketOrderService {
     @Autowired
     private RedisDistributedService redisDistributedService;
 
+    @Autowired
+    private StockTransactionService stockTransactionService;
 
 
     // SELECT
@@ -76,19 +79,16 @@ public class TicketOrderServiceImpl implements TicketOrderService {
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    //@Transactional(rollbackFor = Exception.class)
     public boolean decreaseStockCAS(Long tickerId, int quantity) {
         boolean isRedisDecremented = false;
         try {
             // get stock available trên redis trước, rồi khấu trừ trên redis, redis -> ok => khấu trừ db
-            long startTime = System.nanoTime();
+         //   long startTime = System.nanoTime();
 
             int redisResult = stockOrderCacheService.decreaseStockCacheByLUA(tickerId, quantity);
-            long endTime = System.nanoTime();
+          //  long endTime = System.nanoTime();
 
-            long durationNano = endTime - startTime;
-            double durationMillis = durationNano / 1_000_000.0; // Đổi sang mili giây
-            log.info("decreaseStockLevel3CAS: Thời gian thực hiện luaScript:={}", durationMillis + "ms");
 
 
             if (redisResult == -1) {
@@ -103,9 +103,9 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             isRedisDecremented = true;
 
             // If Redis OK then continues stockDeduction in database
-            long startTime1 = System.nanoTime();
+         //   long startTime1 = System.nanoTime();
 
-            boolean isDecreaseStockSuccess = ticketOrderRepository.decreaseStock1(tickerId, quantity);
+            boolean isDecreaseStockSuccess = stockTransactionService.decreaseStock1(tickerId, quantity);
             log.info("Case: isDecreaseStockSuccess {}", isDecreaseStockSuccess);
 
             if (!isDecreaseStockSuccess) {
@@ -114,13 +114,13 @@ public class TicketOrderServiceImpl implements TicketOrderService {
                 log.warn("DB update failed, rolled back Redis stock for ticketId={}", tickerId);
                 return false;
             }
-            long endTime1 = System.nanoTime();
+//            long endTime1 = System.nanoTime();
+//
+//            long durationNano1 = endTime1 - startTime1;
+//            double durationMillis1 = durationNano1 / 1_000_000.0; // Đổi sang mili giây
+//            log.info("decreaseStock1: Thời gian thực hiện trừ trong DB:={}", durationMillis1 + "ms");
 
-            long durationNano1 = endTime1 - startTime1;
-            double durationMillis1 = durationNano1 / 1_000_000.0; // Đổi sang mili giây
-            log.info("decreaseStock1: Thời gian thực hiện trừ trong DB:={}", durationMillis1 + "ms");
-
-            long startTime2 = System.nanoTime();
+         //   long startTime2 = System.nanoTime();
 
             TickerOrder tickerOrderPlace = new TickerOrder();
             int userId = ThreadLocalRandom.current().nextInt(1, 10);
@@ -142,17 +142,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             String nTable = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
             //orderDeductionDomainService.insertOrder(nTable, tickerOrderPlace);
             orderDeductionService.insertOrder(nTable, tickerOrderPlace);
-            long endTime2 = System.nanoTime();
 
-            long durationNano2 = endTime2 - startTime2;
-            double durationMillis2 = durationNano2 / 1_000_000.0; // Đổi sang mili giây
-            log.info("InsertDb: Thời gian thực hiện insert trong DB:={}", durationMillis1 + "ms");
-
-            long endTime4 = System.nanoTime();
-
-            long durationNano4 = endTime4 - startTime;
-            double durationMillis4 = durationNano4 / 1_000_000.0; // Đổi sang mili giây
-            log.info("Tổng  Thời gian thực hiện  trong transaction:={}", durationMillis4 + "ms");
 
             return true;
         } catch (PessimisticLockException e) {

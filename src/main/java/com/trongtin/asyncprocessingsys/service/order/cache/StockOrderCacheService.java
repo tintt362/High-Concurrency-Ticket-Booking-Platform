@@ -87,13 +87,12 @@ public class StockOrderCacheService {
         long endTime = System.nanoTime();
         double durationMillis = (endTime - startTime) / 1_000_000.0;
 
-        System.out.println("Thời gian thực hiện luaScript tối ưu: " + durationMillis + " ms");
         return result != null ? result.intValue() : -1;
     }
     public int decreaseStockCacheByLUA(Long ticketId, Integer quantity) {
         String keyStockLUA = getKeyStockItemCache(ticketId);
         // return -1 when key doesn't exist (cache not warmed), 0 when out of stock, 1 when success
-        long startTime = System.nanoTime();
+      //  long startTime = System.nanoTime();
 
         String luaScript =
                 "local stock = redis.call('GET', KEYS[1]); " +
@@ -105,23 +104,16 @@ public class StockOrderCacheService {
                         "end; " +
                         "return 0; ";
 
-        long startTime1 = System.nanoTime();
 
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
         Long result = redisInfrasService.getRedisTemplate().execute(redisScript, Collections.singletonList(keyStockLUA), quantity);
-        long endTime1 = System.nanoTime();
-
-        long durationNano1 = endTime1 - startTime1;
-        double durationMillis1 = durationNano1 / 1_000_000.0; // Đổi sang mili giây
-        System.out.println("Thời gian thực hiện execute " + durationMillis1 + " ms");
 
 
-        long endTime = System.nanoTime();
+       // long endTime = System.nanoTime();
 
-        long durationNano = endTime - startTime;
-        double durationMillis = durationNano / 1_000_000.0; // Đổi sang mili giây
-        System.out.println("Thời gian thực hiện luaScript: " + durationMillis + " ms");
-        System.out.println("Kêt quả  luaScript: " + result);
+       // long durationNano = endTime - startTime;
+      //  double durationMillis = durationNano / 1_000_000.0; // Đổi sang mili giây
+     //   log.info("StockOrderCacheService: Thời gian thực hiện luaScript:={}", durationMillis + "ms");
         return result != null ? result.intValue() : -1;
     }
 
