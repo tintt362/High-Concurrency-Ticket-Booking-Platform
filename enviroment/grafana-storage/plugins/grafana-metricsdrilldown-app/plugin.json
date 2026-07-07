@@ -64,8 +64,8 @@
                 "path": "img/breakdown.png"
             }
         ],
-        "version": "2.1.0",
-        "updated": "2026-06-16",
+        "version": "2.2.0",
+        "updated": "2026-07-02",
         "links": [
             {
                 "name": "GitHub",
@@ -73,7 +73,7 @@
             },
             {
                 "name": "Report a bug",
-                "url": "https://github.com/grafana/metrics-drilldown/issues/new"
+                "url": "https://github.com/grafana/metrics-drilldown/issues/new?template=bug_report.md"
             }
         ]
     },

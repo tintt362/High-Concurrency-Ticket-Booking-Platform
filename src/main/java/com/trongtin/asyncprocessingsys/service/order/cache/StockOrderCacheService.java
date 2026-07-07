@@ -21,7 +21,25 @@ public class StockOrderCacheService {
 
     @Autowired
     private RedisInfrasService redisInfrasService;
+    // 1. Tạo biến static final hoặc Bean để lưu cấu trúc Script cố định
+    private static final DefaultRedisScript<Long> DECREASE_STOCK_SCRIPT;
 
+    static {
+        String luaScript =
+                "local stock = redis.call('GET', KEYS[1]); " +
+                        "if stock == false then return -1 end; " +
+                        "stock = tonumber(stock); " +
+                        "if (stock >= tonumber(ARGV[1])) then " +
+                        "   redis.call('SET', KEYS[1], stock - tonumber(ARGV[1])); " +
+                        "   return 1; " +
+                        "end; " +
+                        "return 0; ";
+
+        DECREASE_STOCK_SCRIPT = new DefaultRedisScript<>();
+        DECREASE_STOCK_SCRIPT.setScriptText(luaScript);
+        DECREASE_STOCK_SCRIPT.setResultType(Long.class);
+
+    }
     public boolean addStockAvailableToCache(Long ticketId) {
         // That's remember check validation(*)
         if(ticketId == null) {
@@ -55,10 +73,27 @@ public class StockOrderCacheService {
         }
         return 0; // stockAvailable = 0 , quantity = 1
     }
+    public int decreaseStockCacheByLUAOld(Long ticketId, Integer quantity) {
+        String keyStockLUA = getKeyStockItemCache(ticketId);
+        long startTime = System.nanoTime();
 
+        // 2. Sử dụng lại instance DECREASE_STOCK_SCRIPT đã được tối ưu SHA-1
+        Long result = redisInfrasService.getRedisTemplate().execute(
+                DECREASE_STOCK_SCRIPT,
+                Collections.singletonList(keyStockLUA),
+                quantity
+        );
+
+        long endTime = System.nanoTime();
+        double durationMillis = (endTime - startTime) / 1_000_000.0;
+
+        return result != null ? result.intValue() : -1;
+    }
     public int decreaseStockCacheByLUA(Long ticketId, Integer quantity) {
         String keyStockLUA = getKeyStockItemCache(ticketId);
         // return -1 when key doesn't exist (cache not warmed), 0 when out of stock, 1 when success
+      //  long startTime = System.nanoTime();
+
         String luaScript =
                 "local stock = redis.call('GET', KEYS[1]); " +
                         "if stock == false then return -1 end; " +
@@ -68,8 +103,17 @@ public class StockOrderCacheService {
                         "   return 1; " +
                         "end; " +
                         "return 0; ";
+
+
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
         Long result = redisInfrasService.getRedisTemplate().execute(redisScript, Collections.singletonList(keyStockLUA), quantity);
+
+
+       // long endTime = System.nanoTime();
+
+       // long durationNano = endTime - startTime;
+      //  double durationMillis = durationNano / 1_000_000.0; // Đổi sang mili giây
+     //   log.info("StockOrderCacheService: Thời gian thực hiện luaScript:={}", durationMillis + "ms");
         return result != null ? result.intValue() : -1;
     }
 

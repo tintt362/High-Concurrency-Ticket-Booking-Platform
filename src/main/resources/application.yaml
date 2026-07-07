@@ -1,12 +1,12 @@
 server:
-  port: 1122
+  port: 11222
 
 spring:
   #  main:
   #    lazy-initialization: true
   # application
   application:
-    name: xxxx.com
+    name: trongtin.com
   #DBS
   datasource:
     hikari:
@@ -62,3 +62,10 @@ management:
     metrics:
       export:
         enabled: true
+#
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.stat: DEBUG
+#    com.zaxxer.hikari: DEBUG
+#    org.springframework.transaction: TRACE
