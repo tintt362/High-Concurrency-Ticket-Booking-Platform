@@ -6,12 +6,11 @@ import com.trongtin.asyncprocessingsys.dto.response.PagedOrdersDTO;
 import com.trongtin.asyncprocessingsys.dto.response.PlaceOrderResponse;
 import com.trongtin.asyncprocessingsys.dto.response.TicketOrderDTO;
 import com.trongtin.asyncprocessingsys.model.entity.TickerOrder;
-import com.trongtin.asyncprocessingsys.repository.order.OrderDeductionRepository;
-import com.trongtin.asyncprocessingsys.repository.order.TicketOrderRepository;
+import com.trongtin.asyncprocessingsys.repository.ticket.TicketOrderRepository;
 import com.trongtin.asyncprocessingsys.service.order.OrderDeductionService;
+import com.trongtin.asyncprocessingsys.service.order.StockTransactionService;
 import com.trongtin.asyncprocessingsys.service.order.TicketOrderService;
 import com.trongtin.asyncprocessingsys.service.order.cache.StockOrderCacheService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import lombok.extern.slf4j.Slf4j;
@@ -45,14 +44,15 @@ public class TicketOrderServiceImpl implements TicketOrderService {
     @Autowired
     private RedisDistributedService redisDistributedService;
 
-//    @Autowired
-    // private MQPlaceOrderServiceImpl mqPlaceOrderService;
+    @Autowired
+    private StockTransactionService stockTransactionService;
+
 
     // SELECT
     // UPDATE
     @Override
     @Transactional
-    public boolean decreaseStockLevel1(Long tickerId, int quantity) {
+    public boolean decreaseStock1(Long tickerId, int quantity) {
         try {
 
             int stockAvailable = ticketOrderRepository.getStockAvailable(tickerId); // LOCK MYSQL -> SELECT ... FOR UPDATE;
@@ -60,7 +60,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
                 log.info("Case: stockAvailable < quantity | {}, {}", stockAvailable, quantity);
                 return false;
             }
-            return ticketOrderRepository.decreaseStockLevel1(tickerId, quantity);
+            return ticketOrderRepository.decreaseStock1(tickerId, quantity);
         } catch (PessimisticLockException e) {
             log.warn("Pessimistic Locking failed for ticketId={}", tickerId);
             return false;
@@ -79,13 +79,18 @@ public class TicketOrderServiceImpl implements TicketOrderService {
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean decreaseStockLevel3CAS(Long tickerId, int quantity) {
+    //@Transactional(rollbackFor = Exception.class)
+    public boolean decreaseStockCAS(Long tickerId, int quantity) {
         boolean isRedisDecremented = false;
         try {
             // get stock available trên redis trước, rồi khấu trừ trên redis, redis -> ok => khấu trừ db
+         //   long startTime = System.nanoTime();
 
             int redisResult = stockOrderCacheService.decreaseStockCacheByLUA(tickerId, quantity);
+          //  long endTime = System.nanoTime();
+
+
+
             if (redisResult == -1) {
                 log.info("decreaseStockLevel3CAS: cache miss for ticketId={}, warming up...", tickerId);
                 stockOrderCacheService.addStockAvailableToCache(tickerId);
@@ -98,7 +103,9 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             isRedisDecremented = true;
 
             // If Redis OK then continues stockDeduction in database
-            boolean isDecreaseStockSuccess = ticketOrderRepository.decreaseStockLevel1(tickerId, quantity);
+         //   long startTime1 = System.nanoTime();
+
+            boolean isDecreaseStockSuccess = stockTransactionService.decreaseStock1(tickerId, quantity);
             log.info("Case: isDecreaseStockSuccess {}", isDecreaseStockSuccess);
 
             if (!isDecreaseStockSuccess) {
@@ -107,6 +114,13 @@ public class TicketOrderServiceImpl implements TicketOrderService {
                 log.warn("DB update failed, rolled back Redis stock for ticketId={}", tickerId);
                 return false;
             }
+//            long endTime1 = System.nanoTime();
+//
+//            long durationNano1 = endTime1 - startTime1;
+//            double durationMillis1 = durationNano1 / 1_000_000.0; // Đổi sang mili giây
+//            log.info("decreaseStock1: Thời gian thực hiện trừ trong DB:={}", durationMillis1 + "ms");
+
+         //   long startTime2 = System.nanoTime();
 
             TickerOrder tickerOrderPlace = new TickerOrder();
             int userId = ThreadLocalRandom.current().nextInt(1, 10);
@@ -128,6 +142,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             String nTable = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
             //orderDeductionDomainService.insertOrder(nTable, tickerOrderPlace);
             orderDeductionService.insertOrder(nTable, tickerOrderPlace);
+
 
             return true;
         } catch (PessimisticLockException e) {
@@ -167,7 +182,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             isRedisDecremented = true;
 
             // Redis Lua đã là atomic gate → DB chỉ cần safety net, không cần CAS
-            boolean isDecreaseStockSuccess = ticketOrderRepository.decreaseStockLevel1(ticketId, quantity);
+            boolean isDecreaseStockSuccess = ticketOrderRepository.decreaseStock1(ticketId, quantity);
             if (!isDecreaseStockSuccess) {
                 stockOrderCacheService.increaseStockCache(ticketId, quantity);
                 log.warn("placeOrderCAS: DB update failed, rolled back Redis for ticketId={}", ticketId);
@@ -209,31 +224,6 @@ public class TicketOrderServiceImpl implements TicketOrderService {
         }
     }
 
-//    @Override
-//    public boolean decreaseStockQueue(Long userId, Long tickerId, int quantity) {
-//        log.info("decreaseStockQueue | {} | {} | {}", userId, tickerId, quantity);
-//        if (userId == null || tickerId == null || quantity <= 0) {
-//            return false;
-//        }
-//
-//        // 1. LockKey
-//        RedisDistributedLocker tokenLockKey = redisDistributedService.getDistributedLock(genTokenLockKey(tickerId));
-//        try {
-//            boolean isLock = tokenLockKey.tryLock(1, 5, TimeUnit.SECONDS);
-//            if (!isLock) {
-//                return false;
-//            }
-//
-//            // nếu lock thành công thì mới gọi order
-//            boolean isOrder = mqPlaceOrderService.startOrderByUser(userId, tickerId, quantity);
-//            return isOrder;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }finally {
-//            tokenLockKey.unlock();
-//        }
-//    }
-//
     @Override
     public int getStockAvailable(Long ticketId) {
         return ticketOrderRepository.getStockAvailable(ticketId);
@@ -341,50 +331,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
         return "TOKEN_LOCK_KEY" + ticketId;
     }
 
-//    // Đây là nơi điều phối (Orchestration) toàn bộ quá trình: Hủy đơn -> Hoàn kho DB -> Hoàn kho Redis.
-//    @Override
-//    @Transactional(rollbackFor = Exception.class)
-//    public boolean cancelOrder(Long userId, String orderNumber) {
-//        log.info("cancelOrder | userId: {} | orderNumber: {}", userId, orderNumber);
-//
-//        // 1. Lấy yearMonth từ mã đơn hàng
-//        String yearMonth = extractYearMonthFromOrderNumber(orderNumber);
-//
-//        // 2. Tìm đơn hàng thực tế trong DB
-//        TicketOrderDTO order = findByOrderNumber(yearMonth, orderNumber);
-//
-//        // Kiểm tra tồn tại và quyền sở hữu
-//        if (order == null || !order.getUserId().equals(userId.intValue())) {
-//            log.error("Order not found or not belong to user: {}", orderNumber);
-//            return false;
-//        }
-//
-//        // KIỂM TRA: Nếu đơn hàng đã hủy rồi thì không làm gì cả
-//        if (order.getOrderStatus() == 2) {
-//            log.info("Order already cancelled: {}", orderNumber);
-//            return true;
-//        }
-//
-//        // 3. Cập nhật trạng thái thành CANCELLED (2)
-//        boolean isUpdated = orderDeductionDomainService.updateOrderStatus(yearMonth, orderNumber, 2);
-//        if (!isUpdated) {
-//            return false;
-//        }
-//
-//        // 4. LẤY GIÁ TRỊ THỰC TẾ TỪ ĐƠN HÀNG
-//        Long realTicketId = Long.valueOf(order.getTicketId());
-//        int realQuantity = order.getQuantity();
-//
-//        log.info("Restoring stock: ticketId={}, quantity={}", realTicketId, realQuantity);
-//
-//        // 5. Hoàn tồn kho Database
-//        boolean isStockRecoveredDB = tickerOrderDomainService.increaseStock(realTicketId, realQuantity);
-//
-//        // 6. Hoàn tồn kho Redis
-//        boolean isStockRecoveredRedis = stockOrderCacheService.increaseStockCache(realTicketId, realQuantity);
-//        return isStockRecoveredDB;
-//    }
-//
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean cancelOrder(Long userId, String orderNumber) {
@@ -441,11 +388,6 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             boolean isStockRecoveredRedis = stockOrderCacheService.increaseStockCache(ticketId, quantity);
             if (!isStockRecoveredRedis) {
                 log.warn("Redis stock recovery failed (Inconsistency), order: {}", orderNumber);
-                // Có thể ghi log lỗi ra một bảng riêng để quét bù (Retry)
-                // 3. -> MQ
-                // mqService.sendRecoveryStockMessage(order.getTicketId(), order.getQuantity())
-                //.. Dual write
-                //... TCC -> Try Confirm Cancel
 
             }
 

@@ -1,147 +1,61 @@
-# 🚀 Async Job Processing System (Redis Streams & AI)
+# High-Concurrency Ticket Booking System 
 
-A high-performance, fault-tolerant asynchronous job processing system built with **Spring Boot 3**, **Redis Streams**, and **Local AI (Ollama)**.
-
-Designed for SaaS platforms to handle heavy workloads like Email, PDF generation, and Webhooks with high reliability, fault tolerance, and scalability.
-
----
-
-## 🌟 Key Features
-
-* **Asynchronous Execution**
-  Offloads time-consuming tasks to background workers → API response time < 100ms
-
-* **Reliable Messaging (Redis Streams)**
-  Uses **Consumer Groups** and **Pending Entry List (PEL)**
-  → Guarantees *at-least-once delivery*
-
-* **Self-Healing Architecture**
-  Uses **XCLAIM** to recover jobs if a worker crashes
-
-* **Smart Job Classification (AI)**
-  Integrates **Ollama (Gemma / Llama3)**
-  → Auto-classifies priority (High / Medium / Low)
-  → Generates dynamic content
-
-* **Dead Letter Queue (DLQ)**
-  Prevents infinite retries by isolating failed jobs after **N retries**
-
-* **Reliable Webhooks**
-  Uses **Exponential Backoff** (10s → 30s → 90s)
-
-* **Observability**
-  Monitoring via **Prometheus + Grafana**
-
----
-
-## 🏗️ Architecture
-
-```text
-Client
-  ↓
-API (Producer)
-  ↓
-MySQL (Persist Job State)
-  ↓
-Redis Streams (Message Broker)
-  ↓
-Workers (Consumers)
-  ↓
-- AI Processing (Ollama)
-- PDF Generation
-- Email Service
-  ↓
-Webhook Callback
-```
-
-### Job Flow
-
-* Client sends POST /api/v1/jobs
- 
-
-* AI classifies job priority (HIGH / MEDIUM / LOW)
-
-* Job stored in MySQL (PENDING)
-
-* Message pushed to Redis Stream
-
-* Worker consumes via XREADGROUP
-* Process job (Email / PDF / AI)
-* Success → XACK
-* Failure → retry → DLQ if exceeded
----
-
-## 🛠️ Tech Stack
-
-* **Language**: Java 21
-* **Framework**: Spring Boot 3, Spring Data JPA
-* **Database**:
-
-  * MySQL 8 (Persistence)
-  * Redis 7 (Queue - Streams)
-* **AI Engine**: Ollama (Local LLMs)
-* **Monitoring**: Micrometer, Prometheus, Grafana
-* **Infrastructure**: Docker, Docker Compose
-
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-
-* Docker & Docker Compose
-* Java 21
-* Maven
-* Ollama installed (model: `llama3` or `gemma`)
-
----
-
-### 2. Run with Docker
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/async-job-system.git
-
-cd async-job-system
-
-# Start infrastructure
-docker-compose up -d
-```
-
----
-
-### 3. Run Application
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
----
-
-### 4. Configuration
-
-Update:
-
-```text
-src/main/resources/application.yml
-```
-
-to match your local environment if needed.
-
----
+A high-concurrency ticket booking system designed to handle flash-sale scenarios and prevent overselling under heavy traffic.
+# ⚠️ Note
+This project is intended for learning and demonstration purposes only.
 
 
 
-## 📌 Future Improvements
+The environment configuration files are included to simplify project setup for reviewers and developers who want to explore the source code. All exposed values are non-production configurations and do not contain any sensitive business data.
+In a production environment, secrets and credentials should never be committed to source control and must be managed securely.
+## 🚀 The project focuses on:
+- High Concurrency Processing
+- Overselling Prevention
+- Distributed Caching
+- Cache Consistency
+- Distributed Locking
+- Monitoring & Observability
+## 🛠 Tech Stack
 
-* Add Kubernetes deployment
-* Implement rate limiting
-* Optimize AI inference performance
-* Add distributed tracing (OpenTelemetry)
+- **Backend:** Java 21, Spring Boot 3.x, Spring Data JPA, Hibernate, MySQL.
+- **Caching & Event Distribution:** Redis Server (Lettuce connection pool).
+- **Observability:** Prometheus, Grafana.
+- **Logging:** ELK Stack (Elasticsearch, Logstash, Kibana).
+- **DevOps:** Docker, Docker Compose.
 
----
 
+
+## Key Features
+### Ticket Management
+- Create, Update, Delete Tickets
+- Ticket Availability Management
+
+### Order Management
+- Place Orders
+- Cancel Orders
+- Based Pagination
+### High-Concurrency Booking
+### Implemented multiple booking strategies:
+- Optimistic Lock
+- Redis Lua Script
+
+### Performance Optimization
+#### Multi-Level Caching
+- Redis Cache
+- Local Cache
+- Cache-Aside Pattern
+### Dynamic Order Tables
+#### Orders are automatically partitioned by month:
+- ticket_order_202601
+- ticket_order_202602
+- ticket_order_202603
+
+## Getting Started
+### Run Infrastructure
+- docker-compose up -d
+### Start Application
+- mvn clean install  
+- mvn spring-boot:run
 ## 👨‍💻 Author
 
 **Thai Trong Tin**

@@ -94,7 +94,7 @@ public class TicketDetailCacheServiceRefactor {
         try {
             // 1 - Tao lock
             boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
-            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
+            // Lưu ý:  unLock
             if (!isLock) {
                 return null; // return retry
             }
@@ -170,7 +170,6 @@ public class TicketDetailCacheServiceRefactor {
                 log.info("Lock acquisition failed, retrying... Remaining attempts: {}", retryCount);
                 Thread.sleep(100); // Ngủ 100ms chờ thread khác nạp cache xong rồi vòng lại check
 
-                // Sau khi ngủ dậy, thử đọc lại từ Redis luôn xem có chưa trước khi loop tiếp
                 TicketDetailCache cacheCheck = redisInfrasService.getObject(genEventItemKey(ticketId), TicketDetailCache.class);
                 if (cacheCheck != null) {
                     return cacheCheck;
@@ -184,7 +183,7 @@ public class TicketDetailCacheServiceRefactor {
             }
         }
 
-        return null; // Trường hợp xui xẻo nhất sau 3 lần retry vẫn không có dữ liệu
+        return null;
     }
 
     /**

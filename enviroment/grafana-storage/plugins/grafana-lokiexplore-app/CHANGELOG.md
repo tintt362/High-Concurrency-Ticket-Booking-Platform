@@ -1,5 +1,54 @@
 # Changelog
 
+## [2.1.5](https://github.com/grafana/logs-drilldown/compare/v2.1.4...v2.1.5) (2026-06-24)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump dompurify override to 3.4.11 for CVE remediation ([#1970](https://github.com/grafana/logs-drilldown/issues/1970)) ([b607808](https://github.com/grafana/logs-drilldown/commit/b60780830c857198f55650efa3b7a7c67e3630ce))
+
+## [2.1.4](https://github.com/grafana/logs-drilldown/compare/v2.1.3...v2.1.4) (2026-06-22)
+
+
+### 🐛 Bug Fixes
+
+* **generateLinkFromFilters:** fix potentially duplicated filters ([#1969](https://github.com/grafana/logs-drilldown/issues/1969)) ([e2bb984](https://github.com/grafana/logs-drilldown/commit/e2bb98424477ecda91c2f2b7006d7383c7f9760e))
+* **Layout:** improve layout resizing ([#1966](https://github.com/grafana/logs-drilldown/issues/1966)) ([c63373a](https://github.com/grafana/logs-drilldown/commit/c63373aebbfcd4016f7f95cb6526ec67fe0dbfc5))
+
+## 2.1.3
+
+##### Chores
+
+* **ci:**
+  *  update version-pr trigger (#1949) (23d225ef)
+  *  update bundle-types node version (#1950) (e759c4e0)
+* **deps:**  update to 13.0.2, remove unused, pin (#1941) (3c18411d)
+
+##### New Features
+
+* **logs:**  new options for service selection (show context, go to log line, show similar log lines, add line filter) and updated permalinks (#1940) (158acbf0)
+
+##### Bug Fixes
+
+* **security/high/:**  update security protobufjs to v8.6.0 [security] (#1956) (6a229187)
+* **ServiceSelection:**  fix broken context queries in due to trailing commas (#1953) (34b809e7)
+
+
+## 2.1.2
+
+##### Chores
+
+* **version-pr:**  try creating a pr for version-bump-changelog (#1942) (2b21a5d1)
+* **release-please:**  update trigger to autogenerate git tags (#1939) (6f233d77)
+
+
+## 2.1.1
+
+##### Bug Fixes
+
+* **ServiceSelectionTabsScene:**  rename add tab action (#1937) (732e748c)
+
+
 ## [2.1.0](https://github.com/grafana/logs-drilldown/compare/v2.0.4...v2.1.0) (2026-06-09)
 
 

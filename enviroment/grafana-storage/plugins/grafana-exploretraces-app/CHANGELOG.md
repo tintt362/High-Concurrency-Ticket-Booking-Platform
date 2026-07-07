@@ -1,5 +1,68 @@
 # Changelog
 
+## [2.1.0](https://github.com/grafana/traces-drilldown/compare/v2.0.4...v2.1.0) (2026-06-30)
+
+
+### 🎉 Features
+
+* Exceptions tab grouping ([#756](https://github.com/grafana/traces-drilldown/issues/756)) ([c119dab](https://github.com/grafana/traces-drilldown/commit/c119dab0085c457bbfc89823fbc5a72fb84b5fa2))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump dompurify override to ^3.4.11 for CVE remediation ([#792](https://github.com/grafana/traces-drilldown/issues/792)) ([fb1005d](https://github.com/grafana/traces-drilldown/commit/fb1005d5c6fec6da5423daeeb98fbe5d9ca47c33))
+
+
+### 🤖 Continuous Integrations
+
+* **release-please:** add release please ([#790](https://github.com/grafana/traces-drilldown/issues/790)) ([acd2986](https://github.com/grafana/traces-drilldown/commit/acd2986b8af197196ec2abd20c0daeecab90a164))
+
+
+### 🧹 Chore
+
+* **ci/cd:** update to 10.1.0 ([#795](https://github.com/grafana/traces-drilldown/issues/795)) ([227255d](https://github.com/grafana/traces-drilldown/commit/227255dfadeb22484a096dbf36693a816d37839a))
+* **ci:** Update release workflows ([#806](https://github.com/grafana/traces-drilldown/issues/806)) ([8e02d22](https://github.com/grafana/traces-drilldown/commit/8e02d22b23bc817adf66bc62e953cfd609011fd4))
+* Create new plugin info menu ([#757](https://github.com/grafana/traces-drilldown/issues/757)) ([0535132](https://github.com/grafana/traces-drilldown/commit/05351329e7b64b749bfbe8fec2f7e2859fbb9ac5))
+* **deps:** bump @openfeature/ofrep-web-provider from 0.3.5 to 0.4.1 ([#776](https://github.com/grafana/traces-drilldown/issues/776)) ([589825e](https://github.com/grafana/traces-drilldown/commit/589825e315ba3118d5aa4a9afeb5ce05c5289446))
+* **deps:** update grafana/tempo:latest docker digest to 1ce31d6 ([#767](https://github.com/grafana/traces-drilldown/issues/767)) ([d536388](https://github.com/grafana/traces-drilldown/commit/d53638819dc08da634bfc5da4de92d762c8c881a))
+* **deps:** update rabbitmq:management docker digest to f2aa009 ([#769](https://github.com/grafana/traces-drilldown/issues/769)) ([fbcef1a](https://github.com/grafana/traces-drilldown/commit/fbcef1a327e59fb89074e8bea3be58e34747f0c4))
+* Pin node version in bundle-types ([#778](https://github.com/grafana/traces-drilldown/issues/778)) ([80867c7](https://github.com/grafana/traces-drilldown/commit/80867c739f1a38811d7e3a532141da5501f565a4))
+* Remove publish-technical-documentation workflows ([#791](https://github.com/grafana/traces-drilldown/issues/791)) ([6eb1c08](https://github.com/grafana/traces-drilldown/commit/6eb1c08c62f6dd055ae9b2aba2c1e6012fd2c1ce))
+* Update Grafana packages to 12.4.3 ([#749](https://github.com/grafana/traces-drilldown/issues/749)) ([4ce0ad9](https://github.com/grafana/traces-drilldown/commit/4ce0ad920f5a433a0a2cce68f76cfbcc7ff04c2a))
+* Update packages ([#786](https://github.com/grafana/traces-drilldown/issues/786)) ([e415046](https://github.com/grafana/traces-drilldown/commit/e4150463f1523788e165a9fa1690aab220614059))
+* Workflows update ([#764](https://github.com/grafana/traces-drilldown/issues/764)) ([f02765b](https://github.com/grafana/traces-drilldown/commit/f02765bd2b265df9a0dc06e44d33d63298a80c5c))
+
+## 2.0.4
+
+##### Chores
+
+*  Update ci-cd-workflows (#762) (d5f4fdcd)
+*  update Saved queries texts (#773) (cef85d98)
+*  Harden package use and workspace environment (#761) (bb50beee)
+*  Improve e2e testing (#755) (8426e7a8)
+* **deps:**
+  *  update dependency @playwright/test to v1.59.1 (#704) (6c6357d8)
+  *  lock file maintenance (#711) (e18c0a12)
+  *  bump fast-uri from 3.1.0 to 3.1.2 (#751) (1794aa09)
+  *  pin dependencies (#741) (a000d785)
+  *  update grafana/plugin-actions digest to 016148f (#742) (04322201)
+
+##### New Features
+
+*  Support add to dashboard (#746) (640fc4b2)
+*  Enhance Embedded Traces Drilldown (#744) (6cf5e6d0)
+*  Support create alert (#747) (cf4d73a6)
+
+##### Bug Fixes
+
+*  update Crowdin workflows to use fromJSON secrets output (#775) (e2170753)
+*  syncing of y axis (#754) (2c6a21a9)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#732) (d46cc150)
+
+
 ## 2.0.3
 
 ##### Build System / Dependencies

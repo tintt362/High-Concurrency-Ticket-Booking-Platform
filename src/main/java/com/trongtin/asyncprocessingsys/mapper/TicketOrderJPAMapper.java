@@ -33,7 +33,7 @@ public interface TicketOrderJPAMapper extends JpaRepository<TicketDetail, Long> 
     @Query("UPDATE TicketDetail t SET t.updatedAt = CURRENT_TIMESTAMP, " +
             "t.stockAvailable = t.stockAvailable - :quantity " +
             "WHERE t.id = :ticketId AND t.stockAvailable >= :quantity")
-    int decreaseStockLevel1(@Param("ticketId") Long ticketId, @Param("quantity") int quantity);
+    int decreaseStock1(@Param("ticketId") Long ticketId, @Param("quantity") int quantity);
 
 
 
@@ -42,7 +42,7 @@ public interface TicketOrderJPAMapper extends JpaRepository<TicketDetail, Long> 
     @Query("UPDATE TicketDetail t SET t.updatedAt = CURRENT_TIMESTAMP, " +
             "t.stockAvailable = :oldStockAvailable - :quantity " +
             "WHERE t.id = :ticketId AND t.stockAvailable = :oldStockAvailable")
-    int decreaseStockLevel3CAS(@Param("ticketId") Long ticketId, @Param("oldStockAvailable") int oldStockAvailable, @Param("quantity") int quantity);
+    int decreaseStockCAS(@Param("ticketId") Long ticketId, @Param("oldStockAvailable") int oldStockAvailable, @Param("quantity") int quantity);
 
     /**
      *  Hoàn kho và Cập nhật trạng thái trong Database

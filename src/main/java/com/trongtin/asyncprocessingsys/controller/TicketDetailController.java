@@ -19,16 +19,6 @@ public class TicketDetailController {
     @Autowired
     private TicketDetailService ticketDetailService;
 
-    @GetMapping("/ping/java")
-    public ResponseEntity<Object> ping() throws InterruptedException {
-        // Giả lập tác vụ mất thời gian
-        Thread.sleep(1000);  // Giống như time.Sleep(1 * time.Second)
-
-        // Trả về response với status OK
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new Response("OK"));
-    }
-
     // Lớp Response để trả về JSON response
     public static class Response {
         private String status;

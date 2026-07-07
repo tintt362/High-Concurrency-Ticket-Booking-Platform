@@ -145,7 +145,6 @@ public class OrderDeductionRepositoryImpl implements OrderDeductionRepository {
     private void ensureTableExists(String yearMonth) { // 202604
         String tableName = getTableName(yearMonth);
 
-        // Nếu trong RAM đã xác nhận bảng này tồn tại rồi thì return ngay (Tối ưu CCU)
         if (tableCreatedCache.containsKey(tableName)) {
             return;
         }
@@ -164,8 +163,7 @@ public class OrderDeductionRepositoryImpl implements OrderDeductionRepository {
                 tableCreatedCache.put(tableName, true);
             } catch (Exception e) {
                 log.error("Failed to ensure table exists for: {}", tableName, e);
-                // Không throw exception ở đây để tránh làm gián đoạn luồng chính
-                // Nếu bảng thực sự không có, Database sẽ báo lỗi ở câu lệnh SQL phía sau.
+
             }
         }
     }
