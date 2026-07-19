@@ -35,18 +35,6 @@ public class TicketOrderController {
         return ticketOrderAppService.decreaseStock1(ticketId, quantity);
     }
 
-    /**
-     Level 3
-     */
-
-    @GetMapping("/{ticketId}/{quantity}/cas")
-    public boolean orderTicketByLevel3(
-            @PathVariable("ticketId") Long ticketId,
-            @PathVariable("quantity") int quantity
-    ) {
-        log.info("Controller:->orderTicketByLevel3 | {}, {}", ticketId, quantity);
-        return ticketOrderAppService.decreaseStockCAS(ticketId, quantity);
-    }
 
     @PostMapping("/cas")
     public ResultMessage<PlaceOrderResponse> placeOrderCAS(@Valid @RequestBody CreateBookingRequest request) {

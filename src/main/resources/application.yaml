@@ -69,3 +69,6 @@ management:
 #    org.hibernate.stat: DEBUG
 #    com.zaxxer.hikari: DEBUG
 #    org.springframework.transaction: TRACE
+
+  elasticsearch:
+    uris: http://localhost:9200
