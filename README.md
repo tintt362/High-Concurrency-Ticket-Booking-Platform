@@ -20,7 +20,7 @@ Các tệp cấu hình môi trường được đính kèm nhằm giúp người
 - **Giảm latency** từ >500ms → **<60ms** nhờ 2-level caching (Guava + Redis).
 - **Distributed Lock** với Redisson đảm bảo tính nhất quán.
 - **Atomic stock deduction** bằng Redis Lua Script + CAS + MySQL transaction.
-- **Audit Log** bất đồng bộ với Elasticsearch.
+- **Audit Log** với Elasticsearch.
 - **Monthly table sharding** cho bảng order.
 - **Monitoring** realtime với Spring Actuator + Prometheus + Grafana.
 - **Rollback compensation** khi transaction fail.
