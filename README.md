@@ -43,7 +43,7 @@ Các tệp cấu hình môi trường được đính kèm nhằm giúp người
 - **GET /ticket/detail**: <60ms
 - **test**: 9.000+ requests/sec (JMeter)
 <img width="1879" height="803" alt="request1" src="https://github.com/user-attachments/assets/16f7f451-6e17-42b2-868f-06b97d76edbc" />
-<img width="1845" height="877" alt="re2" src="https://github.com/user-attachments/assets/74262bcd-d7a3-4f1d-a37a-b9fd9fd2438a" />
+<img width="1940" height="1744" alt="banvetautet-kafka" src="https://github.com/user-attachments/assets/5c180611-db79-4a15-82e0-d9c36ca4fe6e" />
 
 ## 🚀 Cách chạy project
 
