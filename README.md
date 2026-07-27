@@ -19,7 +19,7 @@ Các tệp cấu hình môi trường được đính kèm nhằm giúp người
 - **Xử lý 2.000+ orders/giây** trong flash-sale mà không overselling.
 - **Giảm latency** từ >500ms → **<60ms** nhờ 2-level caching (Guava + Redis).
 - **Distributed Lock** với Redisson đảm bảo tính nhất quán.
-- **Atomic stock deduction** bằng Redis Lua Script + CAS + MySQL transaction.
+- **Atomic stock deduction** bằng  CAS + MySQL transaction.
 - **Audit Log** với Elasticsearch.
 - **Monthly table sharding** cho bảng order.
 - **Monitoring** realtime với Spring Actuator + Prometheus + Grafana.
@@ -29,15 +29,21 @@ Các tệp cấu hình môi trường được đính kèm nhằm giúp người
 
 **Backend:** Java 17, Spring Boot 3.2, Spring Data JPA, Hibernate  
 **Database:** MySQL 8, Redis 7  
-**Caching & Lock:** Guava Cache, Redis Lua Script, Redisson Distributed Lock  
+**Caching & Lock:** Guava Cache, Redisson Distributed Lock  
 **Search & Logging:** Elasticsearch, Spring Actuator + Prometheus + Grafana  
 **Others:** Docker, Maven, Lombok
 
-## 📊 Benchmark
+## 🏗 Architecture Diagram
+<img width="4628" height="2420" alt="architech" src="https://github.com/user-attachments/assets/3a14e124-e9ba-488a-b930-e0530e51468c" />
+<img width="4628" height="2420" alt="architech" src="https://github.com/user-attachments/assets/e9c775b3-e664-4d89-b05e-6007ffb2facc" />
 
-- **Throughput**: 2.000+ orders/sec (flash-sale simulation)
-- **GET /ticket/detail**: <60ms (sau cache warm-up)
-- **Concurrency test**: 9.000+ requests/sec (JMeter)
+
+## 📊 Benchmark
+- **Throughput**: 1000 orders/sec 
+- **GET /ticket/detail**: <60ms
+- **test**: 9.000+ requests/sec (JMeter)
+<img width="1879" height="803" alt="request1" src="https://github.com/user-attachments/assets/16f7f451-6e17-42b2-868f-06b97d76edbc" />
+<img width="1845" height="877" alt="re2" src="https://github.com/user-attachments/assets/74262bcd-d7a3-4f1d-a37a-b9fd9fd2438a" />
 
 ## 🚀 Cách chạy project
 
